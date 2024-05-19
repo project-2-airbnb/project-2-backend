@@ -1,0 +1,404 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+      "version": "1.0.0",
+      "title": "airbnb clone",
+      "description": "Project team 2"
+    },
+    "servers": [
+      {
+        "description": "SwaggerHub API Auto Mocking",
+        "url": "https://virtserver.swaggerhub.com/RianDarmawan/MyTaskApp/1.0.0"
+      }
+      ],
+  "paths": {
+    "/users": {
+          "post": {
+              "tags": ["Users"],
+                "summary": "registrasi user",
+                "description": "registrasi user",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                          "schema": {
+                              "$ref": "#/components/schemas/CreateOrUpdateUsers"
+                          },
+                          "examples": {
+                            "success": {
+                                "description": "Contoh inputan registrasi user",
+                                "value":
+                                  {
+                                  "user_picture": "abcdefghijklmnopqrstuvwxyz",
+                                  "username": "fiki",
+                                  "email" : "fiki@gmail.com",
+                                  "password": "fikifiki",
+                                  "phone": "087785319744",
+                                  "address": "jakarta",
+                                  "user_type": "customer"
+                                  }
+                            },
+                            "failed": {
+                                "description": "Contoh inputan registrasi user",
+                                "value":
+                                  {
+                                  "user_picture": "abcdefghijklmnopqrstuvwxyz",
+                                  "username": "fiki",
+                                  "email" : "fikiiiiii",
+                                  "password": "fikifiki",
+                                  "phone": "087785319744",
+                                  "address": "jakarta",
+                                  "user_type": "customer"
+                                  }
+  
+                            }
+                          }
+                        }
+                    }
+                },
+                "responses": {
+                  "200": {
+                      "description": "registrasi berhasil",
+                      "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "massage": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "examples": {
+                                "success": {
+                                    "description": "Contoh response registrasi berhasil",
+                                    "value":
+                                      {
+                                      "massage": "registrasi berhasil"
+                                      }
+                                }
+                            }
+                        }
+                      }
+                  },
+                  "400": {
+                    "description": "registrasi gagal",
+                    "content": {
+                      "application/json": {
+                          "schema": {
+                              "type": "object",
+                              "properties": {
+                                  "massage": {
+                                      "type": "string"
+                                  }
+                              }
+                          },
+                          "examples": {
+                              "failed": {
+                                  "description": "Contoh response registrasi gagal",
+                                  "value":
+                                    {
+                                    "massage": "registrasi gagal"
+                                    }
+                              }
+                          }
+                      }
+                    }
+                  }
+                }  
+          }
+    },
+    "/users/{id}": {
+      "delete": {
+              "security": [
+                {
+                  "JWTAuth": []
+                }
+                ],
+              "tags": ["Users"],
+              "summary": "menghapus data user",
+              "description": "menghapus data user",
+              "parameters": [
+              {
+                  "$ref": "#/components/parameters/Id"
+              }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "berhasil menghapus data user",
+                      "content": {
+                          "application/json": {
+                              "schema": {
+                                 "type": "number",
+                                 "properties": {
+                                    "massage": {
+                                        "type": "string"
+                                    }
+                                 }
+                              },
+                              "examples": {
+                                  "success": {
+                                      "value": {
+                                          "massage": "berhasil menghapus data user"
+                                      }
+                                  }
+                              }
+                          }
+                      }
+                  }
+              }
+          },
+     "put": {
+        "security": [
+          {
+            "JWTAuth": []
+          }
+          ],
+          "tags": ["Users"],
+          "summary": "mengubah data user",
+          "description": "mengubah data user",
+          "parameters":[
+            {
+              "$ref": "#/components/parameters/Id"
+            }
+            ],
+          "requestBody": {
+              "required": true,
+              "content": {
+                  "application/json": {
+                      "schema": {
+                          "$ref": "#/components/schemas/CreateOrUpdateUsers"
+                    },
+                    "examples": {
+                        "success": {
+                            "value":
+                              {
+                                "user_picture": "abcdefghijklmnopqrstuvwxyz",
+                                "username": "fiki",
+                                "email" : "fiki@gmail.com",
+                                "password": "fikifiki",
+                                "phone": "087785319744",
+                                "address": "jakarta"
+                              }
+                        },
+                        "failed": {
+                            "value":
+                              {
+                                "user_picture": "abcdefghijklmnopqrstuvwxyz",
+                                "username": "fiki",
+                                "email" : "fikiiiiiiiiii",
+                                "password": "fikifiki",
+                                "phone": "087785319744",
+                                "address": "jakarta"
+                              }
+                        }
+                      }
+                  }
+              }
+          },
+        "responses": {
+            "200": {
+                "description": "success update user",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "massage": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "examples": {
+                            "success": {
+                                "value":
+                                  {
+                                  "massage": "berhasil mengubah data"
+                                  }
+                            }
+                          }
+                    }
+                }
+            },
+            "400": {
+                "description": "failed update user",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "massage": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "examples": {
+                            "failed": {
+                                "value":
+                                  {
+                                  "massage": "gagal mengubah data"
+                                  }
+                            }
+                          }
+                    }
+                }
+            }
+        }
+     },
+     "get": {
+        "security": [
+          {
+            "JWTAuth": []
+          }
+          ],
+          "tags": ["Users"],
+          "summary": "Get profile user",
+          "description": "Get profile user by id",
+          "parameters": [
+            {
+              "$ref": "#/components/parameters/Id"
+            }
+            ],
+            "responses": {
+                "200": {
+                    "description": "success get profile user by id",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                               "type": "object",
+                               "properties": {
+                                "user_picture": {
+                                    "type": "string"
+                                },
+                                "username": {
+                                    "type": "string"
+                                },
+                                "email": {
+                                  "type": "string"
+                                },
+                                "password": {
+                                  "type": "string"
+                                },
+                                "phone": {
+                                  "type": "string"
+                                },
+                                "address": {
+                                  "type": "string"
+                                },
+                                "user_type": {
+                                  "type": "boolean"
+                                }
+                               }
+                            },
+                            "examples": {
+                                "success": {
+                                    "description": "success get profile user by id",
+                                    "value": {
+                                        "user_picture": "abcdefghijklmnopqrstuvwxyz",
+                                  "username": "fiki",
+                                  "email" : "fiki@gmail.com",
+                                  "password": "fikifiki",
+                                  "phone": "087785319744",
+                                  "address": "jakarta"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+     }
+    }
+  },
+  "components": {
+      "securitySchemes": {
+          "JWTAuth": {
+              "description": "token for admin",
+               "type": "http",
+               "scheme": "bearer",
+               "bearerFormat": "JWT"
+          },
+          "ProjectAuth": {
+              "description": "Authentication for Project RESTful API",
+              "type": "apiKey",
+              "in": "header",
+              "name": "X-API-Key"
+          }
+      },
+      "parameters": {
+        "Id": {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "user id",
+          "schema": {
+              "type": "number"
+          },
+          "examples": {
+            "success": {
+              "value": "1"
+            }
+          }
+        }
+      },
+      "schemas": {
+          "project": {
+              "type": "object",
+              "properties": {
+                "massage": {
+                    "type": "string"
+                },
+                "result": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "integer"
+                            },
+                            "user id": {
+                                "type": "integer"
+                            },
+                            "project name": {
+                                "type": "string"
+                            },
+                            "description": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "status": {
+                    "type": "string"
+                }
+              }
+          },
+          "CreateOrUpdateUsers": {
+              "type": "object",
+              "properties": {
+                  "user_picture": {
+                      "type": "string"
+                  },
+                  "username": {
+                      "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  },
+                  "phone": {
+                    "type": "string"
+                  },
+                  "address": {
+                    "type": "string"
+                  },
+                  "user_type": {
+                    "type": "boolean"
+                  }
+              }
+          }
+      }
+  }
+  }

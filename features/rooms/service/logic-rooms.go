@@ -46,8 +46,12 @@ func (r *RoomService) AddRoom(room rooms.Room) error {
 }
 
 // DeleteRoom implements rooms.DataRoomService.
-func (*RoomService) DeleteRoom(roomid uint) error {
-	panic("unimplemented")
+func (r *RoomService) DeleteRoom(roomid uint, userid uint) error {
+	err := r.roomData.DeleteRoom(roomid)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // UpdateRoom implements rooms.DataRoomService.

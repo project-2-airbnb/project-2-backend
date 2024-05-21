@@ -39,8 +39,12 @@ func (r *roomQuery) CreateRoom(room rooms.Room) error {
 }
 
 // DeleteRoom implements rooms.DataRoominterface.
-func (*roomQuery) DeleteRoom(roomid uint) error {
-	panic("unimplemented")
+func (r *roomQuery) DeleteRoom(roomid uint) error {
+	tx := r.db.Where("id = ?", roomid).Delete(&Rooms{})
+	if tx.Error != nil {
+		return tx.Error
+	}
+	return nil
 }
 
 // UpdateRoom implements rooms.DataRoominterface.

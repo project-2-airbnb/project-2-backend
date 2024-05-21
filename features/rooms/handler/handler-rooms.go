@@ -1,10 +1,12 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 	"project-2/app/middlewares"
 	"project-2/features/rooms"
 	"project-2/utils/responses"
+	"strconv"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -79,4 +81,26 @@ func (rh *RoomHandler) Create(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, responses.JSONWebResponse("berhasil membuat room", nil))
+}
+
+func (rh *RoomHandler) Delete(c echo.Context) error {
+	// Extract user ID from authentication context
+	userID := middlewares.ExtractTokenUserId(c)
+	if userID == 0 {
+		return errors.New("user ID not found in context")
+	}
+
+	id := c.Param("id")
+	idConv, errConv := strconv.Atoi(id)
+	if errConv != nil {
+		return c.JSON(http.StatusBadRequest, responses.JSONWebResponse("error convert data: "+errConv.Error(), nil))
+	}
+	// Memanggil service layer untuk menghapus data
+	if err := rh.roomService.DeleteRoom(uint(idConv), uint(userID)); err != nil {
+		if strings.Contains(err.Error(), "validation") {
+			return c.JSON(http.StatusBadRequest, responses.JSONWebResponse("gagal menghapus room: "+err.Error(), nil))
+		}
+		return c.JSON(http.StatusInternalServerError, responses.JSONWebResponse("gagal menghapus room: "+err.Error(), nil))
+	}
+	return c.JSON(http.StatusOK, responses.JSONWebResponse("berhasil menghapus room", nil))
 }

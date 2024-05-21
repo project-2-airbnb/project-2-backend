@@ -39,5 +39,5 @@ type DataRoominterface interface {
 type DataRoomService interface {
 	AddRoom(room Room) error
 	UpdateRoom(room Room) (Room, error)
-	DeleteRoom(roomid uint) error
+	DeleteRoom(roomid uint, userid uint) error
 }

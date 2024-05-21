@@ -30,7 +30,7 @@ func (r RoomRequest) uploadToCloudinary(file io.Reader, filename string) (string
 
 	// Upload file ke Cloudinary
 	uploadParams := uploader.UploadParams{
-		Folder:   "user_pictures",
+		Folder:   "room_pictures",
 		PublicID: filename,
 	}
 	uploadResult, err := cld.Upload.Upload(context.Background(), file, uploadParams)

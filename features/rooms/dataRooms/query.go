@@ -18,7 +18,8 @@ func New(db *gorm.DB) rooms.DataRoominterface {
 
 // CreateRoom implements rooms.DataRoominterface.
 func (r *roomQuery) CreateRoom(room rooms.Room) error {
-	roomGorm := Rooms{
+	roomsGorm := Rooms{
+		UserID:          room.UserID,
 		RoomPicture:     room.RoomPicture,
 		RoomName:        room.RoomName,
 		Description:     room.Description,
@@ -28,7 +29,7 @@ func (r *roomQuery) CreateRoom(room rooms.Room) error {
 		QuantityBed:     room.QuantityBed,
 		Price:           room.Price,
 	}
-	tx := r.db.Create(&roomGorm)
+	tx := r.db.Create(&roomsGorm)
 
 	if tx.Error != nil {
 		return tx.Error

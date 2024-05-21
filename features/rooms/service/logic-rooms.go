@@ -19,10 +19,14 @@ func New(rd rooms.DataRoominterface) rooms.DataRoomService {
 // AddRoom implements rooms.DataRoomService.
 func (r *RoomService) AddRoom(room rooms.Room) error {
 	if room.RoomName == "" || room.Location == "" || room.Description == "" || room.Price == 0 || room.QuantityBedroom == 0 || room.QuantityGuest == 0 {
-		return errors.New("[validation]roomname/location/description/roomprice/quantitybedroom/quantityguest tidak boleh kosong")
+		return errors.New("[validation] roomname/location/description/roomprice/quantitybedroom/quantityguest tidak boleh kosong")
 	}
 
-	return r.roomData.CreateRoom(room)
+	err := r.roomData.CreateRoom(room)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // DeleteRoom implements rooms.DataRoomService.

@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"project-2/app/middlewares"
 	"project-2/features/rooms"
 	"project-2/utils/responses"
 	"strings"
@@ -19,7 +20,13 @@ func New(rh rooms.DataRoomService) *RoomHandler {
 	}
 }
 
-func (rh *RoomHandler) CreateRoom(c echo.Context) error {
+func (rh *RoomHandler) Create(c echo.Context) error {
+	// Extract user ID from authentication context
+	userID := middlewares.ExtractTokenUserId(c)
+	if userID == 0 {
+		return c.JSON(http.StatusUnauthorized, responses.JSONWebResponse("Unauthorized", nil))
+	}
+
 	// Membaca data dari body permintaan
 	newRoom := RoomRequest{}
 	errBind := c.Bind(&newRoom)
@@ -29,6 +36,7 @@ func (rh *RoomHandler) CreateRoom(c echo.Context) error {
 
 	// Mapping request ke struct User
 	dataRoom := rooms.Room{
+		UserID:          uint(userID),
 		RoomPicture:     newRoom.RoomPicture,
 		RoomName:        newRoom.RoomName,
 		Description:     newRoom.Description,

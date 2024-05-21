@@ -1,6 +1,10 @@
 package routes
 
 import (
+	"project-2/app/middlewares"
+	_roomsData "project-2/features/rooms/dataRooms"
+	_roomsHandler "project-2/features/rooms/handler"
+	_roomsService "project-2/features/rooms/service"
 	_userData "project-2/features/users/dataUsers"
 	_userHandler "project-2/features/users/handler"
 	_userService "project-2/features/users/service"
@@ -16,8 +20,16 @@ func InitRouter(e *echo.Echo, db *gorm.DB) {
 	userService := _userService.New(userData, hashService)
 	userHandlerAPI := _userHandler.New(userService)
 
+	roomsData := _roomsData.New(db)
+	roomsService := _roomsService.New(roomsData)
+	roomsHandlerAPI := _roomsHandler.New(roomsService)
+
 	//userHandler
 	e.POST("/users", userHandlerAPI.Register)
 	e.POST("/login", userHandlerAPI.Login)
-	e.PUT("/users/:id", userHandlerAPI.Update)
+	e.PUT("/users/:id", userHandlerAPI.Update, middlewares.JWTMiddleware())
+
+	//roomHandler
+	e.POST("/rooms", roomsHandlerAPI.Create, middlewares.JWTMiddleware())
+	e.DELETE("/rooms/:id", roomsHandlerAPI.Delete, middlewares.JWTMiddleware())
 }

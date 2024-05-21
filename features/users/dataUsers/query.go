@@ -74,6 +74,7 @@ func (u *userQuery) AccountByEmail(email string, usertype string) (*users.User, 
 	}
 	// mapping
 	var users = users.User{
+		UserID:         userData.ID,
 		FullName:       userData.FullName,
 		Email:          userData.Email,
 		Password:       userData.Password,

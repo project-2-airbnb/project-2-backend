@@ -47,3 +47,27 @@ func (*roomQuery) DeleteRoom(roomid uint) error {
 func (*roomQuery) UpdateRoom(room rooms.Room) (rooms.Room, error) {
 	panic("unimplemented")
 }
+
+// GetUserByID implements rooms.DataRoominterface.
+func (r *roomQuery) GetUserByID(userID uint) (*rooms.Room, error) {
+	var roomGorm Rooms
+	tx := r.db.First(&roomGorm, userID)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	// mapping
+	var roomcore = rooms.Room{
+		UserID:          roomGorm.UserID,
+		RoomPicture:     roomGorm.RoomPicture,
+		RoomName:        roomGorm.RoomName,
+		Description:     roomGorm.Description,
+		Location:        roomGorm.Location,
+		QuantityGuest:   roomGorm.QuantityGuest,
+		QuantityBedroom: roomGorm.QuantityBedroom,
+		QuantityBed:     roomGorm.QuantityBed,
+		Price:           roomGorm.Price,
+	}
+
+	return &roomcore, nil
+}

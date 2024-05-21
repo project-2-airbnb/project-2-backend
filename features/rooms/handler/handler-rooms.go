@@ -34,10 +34,33 @@ func (rh *RoomHandler) Create(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, responses.JSONWebResponse("Error binding data: "+errBind.Error(), nil))
 	}
 
+	// Membaca file gambar pengguna (jika ada)
+	file, err := c.FormFile("room_picture")
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, responses.JSONWebResponse("Gagal membaca file gambar: "+err.Error(), nil))
+	}
+
+	// Jika file ada, unggah ke Cloudinary
+	var imageURL string
+	if file != nil {
+		// Buka file
+		src, err := file.Open()
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, responses.JSONWebResponse("Gagal membuka file gambar: "+err.Error(), nil))
+		}
+		defer src.Close()
+
+		// Upload file ke Cloudinary
+		imageURL, err = newRoom.uploadToCloudinary(src, file.Filename)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, responses.JSONWebResponse("Gagal mengunggah gambar: "+err.Error(), nil))
+		}
+	}
+
 	// Mapping request ke struct User
 	dataRoom := rooms.Room{
 		UserID:          uint(userID),
-		RoomPicture:     newRoom.RoomPicture,
+		RoomPicture:     imageURL,
 		RoomName:        newRoom.RoomName,
 		Description:     newRoom.Description,
 		Location:        newRoom.Location,

@@ -48,7 +48,7 @@ jobs:
             docker rm apiContainer || true
             docker rmi ${{ secrets.DOCKERHUB_USERNAME }}/be-images:latest || true
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/be-images:latest
-            docker run -d -p 80:8000 \
+            docker run -d -p 80:8080 \
               -e DBUSER=${{ secrets.DBUSER }} \
               -e DBPASS=${{ secrets.DBPASS }} \
               -e DBHOST=${{ secrets.DBHOST }} \

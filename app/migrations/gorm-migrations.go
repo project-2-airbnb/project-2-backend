@@ -14,5 +14,7 @@ func RunMigrations(db *gorm.DB) {
 	db.AutoMigrate(&datarooms.Rooms{})
 	db.AutoMigrate(&datareview.Reviews{})
 	db.AutoMigrate(&datareservations.Reservations{})
+	db.AutoMigrate(&datarooms.Rooms{})
 	db.AutoMigrate(&datarooms.RoomFacilitys{})
+	db.AutoMigrate(&datarooms.Facilities{})
 }

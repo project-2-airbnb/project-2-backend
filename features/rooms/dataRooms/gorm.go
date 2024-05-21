@@ -3,6 +3,7 @@ package datarooms
 import (
 	datareservations "project-2/features/reservations/dataReservations"
 	datareview "project-2/features/review/dataReview"
+	"project-2/features/rooms"
 
 	"gorm.io/gorm"
 )
@@ -13,25 +14,39 @@ type Rooms struct {
 	RoomPicture     string                          `json:"room_picture"`
 	RoomName        string                          `json:"room_name"`
 	Description     string                          `json:"description"`
+	Location        string                          `json:"location"`
 	QuantityGuest   int                             `json:"quantity_guest"`
 	QuantityBedroom int                             `json:"quantity_bedroom"`
-	QuantityBath    int                             `json:"quantity_bathroom"`
+	QuantityBed     int                             `json:"quantity_bed"`
 	Price           int                             `json:"price"`
-	RoomFacility    []RoomFacilitys                 `gorm:"foreignKey:RoomID"`
+	RoomFacilitas   []RoomFacilitys                 `gorm:"foreignKey:RoomID"`
 	Reservations    []datareservations.Reservations `gorm:"foreignKey:RoomID"`
 	Reviews         []datareview.Reviews            `gorm:"foreignKey:RoomID"`
 }
 
 type RoomFacilitys struct {
 	gorm.Model
-	RoomID         uint `json:"room_id"`
-	Kitchen        bool `json:"kitchen"`
-	Bathtub        bool `json:"bathtub"`
-	Refrigerator   bool `json:"refrigerator"`
-	Wifi           bool `json:"wifi"`
-	TV             bool `json:"tv"`
-	AirConditioner bool `json:"air_conditioner"`
-	FreeParking    bool `json:"free_parking"`
-	BeachView      bool `json:"beach_view"`
-	ParkView       bool `json:"park_view"`
+	RoomID     uint       `json:"room_id"`
+	Facility   Facilities `gorm:"foreignkey:FacilityID"`
+	FacilityID uint       `json:"facility_id"`
+}
+
+type Facilities struct {
+	gorm.Model
+	FacilityName string `json:"facility_name"`
+}
+
+func (r Rooms) ModelToRoom() rooms.Room {
+	return rooms.Room{
+		RoomID:          r.ID,
+		UserID:          r.UserID,
+		RoomPicture:     r.RoomPicture,
+		RoomName:        r.RoomName,
+		Description:     r.Description,
+		Location:        r.Location,
+		QuantityGuest:   r.QuantityGuest,
+		QuantityBedroom: r.QuantityBedroom,
+		QuantityBed:     r.QuantityBed,
+		Price:           r.Price,
+	}
 }

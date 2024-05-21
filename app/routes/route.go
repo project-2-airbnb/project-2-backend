@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"project-2/app/middlewares"
 	_userData "project-2/features/users/dataUsers"
 	_userHandler "project-2/features/users/handler"
 	_userService "project-2/features/users/service"
@@ -19,5 +20,5 @@ func InitRouter(e *echo.Echo, db *gorm.DB) {
 	//userHandler
 	e.POST("/users", userHandlerAPI.Register)
 	e.POST("/login", userHandlerAPI.Login)
-	e.PUT("/users/:id", userHandlerAPI.Update)
+	e.PUT("/users/:id", userHandlerAPI.Update, middlewares.JWTMiddleware())
 }

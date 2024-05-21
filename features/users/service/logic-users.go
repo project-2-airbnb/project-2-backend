@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"project-2/features/users"
 	"project-2/utils/encrypts"
 )
@@ -35,7 +36,27 @@ func (u *userService) LoginAccount(email string, password string) (data *users.U
 
 // RegistrasiAccount implements users.ServiceUserInterface.
 func (u *userService) RegistrasiAccount(accounts users.User) error {
-	panic("not implemented")
+	if accounts.FullName == "" || accounts.Email == "" || accounts.Password == "" || accounts.RetypePassword == "" || accounts.PhoneNumber == "" || accounts.Address == "" {
+		return errors.New("[validation] nama/email/password/phone/address tidak boleh kosong")
+	}
+
+	if accounts.Password != accounts.RetypePassword {
+		return errors.New("[validation] password dan konfirmasi password tidak cocok")
+	}
+
+	if accounts.UserType != "customer" && accounts.UserType != "hosting" {
+		return errors.New("[validation] tipe user tidak valid")
+	}
+
+	// proses hash password
+	hashedPassword, errHash := u.hashService.HashPassword(accounts.Password)
+	if errHash != nil {
+		return errHash
+	}
+
+	accounts.Password = hashedPassword
+
+	return u.userData.CreateAccount(accounts)
 }
 
 // UpdateProfile implements users.ServiceUserInterface.

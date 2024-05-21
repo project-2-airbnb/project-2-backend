@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"project-2/app/middlewares"
 	"project-2/features/users"
 	"project-2/utils/encrypts"
 )
@@ -30,8 +31,23 @@ func (u *userService) GetProfile(userid uint) (data *users.User, err error) {
 }
 
 // LoginAccount implements users.ServiceUserInterface.
-func (u *userService) LoginAccount(email string, password string) (data *users.User, token string, err error) {
-	panic("not implemented")
+func (u *userService) LoginAccount(email string, password string, usertype string) (data *users.User, token string, err error) {
+	data, err = u.userData.AccountByEmail(email, usertype)
+	if err != nil {
+		return nil, "", err
+	}
+
+	isLoginValid := u.hashService.CheckPasswordHash(data.Password, password)
+	// ketika isloginvalid = true, maka login berhasil
+	if !isLoginValid {
+		return nil, "", errors.New("email atau password tidak sesuai")
+	}
+	token, errJWT := middlewares.CreateToken(int(data.UserID))
+	if errJWT != nil {
+		return nil, "", errJWT
+	}
+	return data, token, nil
+
 }
 
 // RegistrasiAccount implements users.ServiceUserInterface.
@@ -49,6 +65,28 @@ func (u *userService) RegistrasiAccount(accounts users.User) error {
 	}
 
 	// proses hash password
+	var errHash error
+	if accounts.Password, errHash = u.hashService.HashPassword(accounts.Password); errHash != nil {
+		return errHash
+	}
+
+	if accounts.RetypePassword, errHash = u.hashService.HashPassword(accounts.RetypePassword); errHash != nil {
+		return errHash
+	}
+
+	return u.userData.CreateAccount(accounts)
+}
+
+// UpdateProfile implements users.ServiceUserInterface.
+func (u *userService) UpdateProfile(userid uint, accounts users.User) error {
+	if accounts.FullName == "" || accounts.Email == "" || accounts.Password == "" || accounts.RetypePassword == "" || accounts.PhoneNumber == "" || accounts.Address == "" {
+		return errors.New("[validation] nama/email/password/phone/address tidak boleh kosong")
+	}
+
+	if accounts.Password != accounts.RetypePassword {
+		return errors.New("[validation] password dan konfirmasi password tidak cocok")
+	}
+
 	hashedPassword, errHash := u.hashService.HashPassword(accounts.Password)
 	if errHash != nil {
 		return errHash
@@ -56,10 +94,5 @@ func (u *userService) RegistrasiAccount(accounts users.User) error {
 
 	accounts.Password = hashedPassword
 
-	return u.userData.CreateAccount(accounts)
-}
-
-// UpdateProfile implements users.ServiceUserInterface.
-func (u *userService) UpdateProfile(userid uint, accounts users.User) error {
-	panic("not implemented")
+	return u.userData.UpdateAccount(userid, accounts)
 }

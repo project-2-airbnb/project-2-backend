@@ -18,4 +18,6 @@ func InitRouter(e *echo.Echo, db *gorm.DB) {
 
 	//userHandler
 	e.POST("/users", userHandlerAPI.Register)
+	e.POST("/login", userHandlerAPI.Login)
+	e.PUT("/users/:id", userHandlerAPI.Update)
 }

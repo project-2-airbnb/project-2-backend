@@ -22,21 +22,6 @@ func (r *RoomService) AddRoom(room rooms.Room) error {
 		return errors.New("[validation] roomname/location/description/roomprice/quantitybedroom/quantityguest tidak boleh kosong")
 	}
 
-	// if room.UserType != "hosting" {
-	// 	return errors.New("[validation] hanya hosting yang bisa membuat room")
-	// }
-
-	// // Get user by ID
-	// user, err := r.roomData.GetUserByID(room.UserID)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// // Check if user exists
-	// if user == nil {
-	// 	return errors.New("UserID tidak valid atau telah dihapus")
-	// }
-
 	// Create room
 	err := r.roomData.CreateRoom(room)
 	if err != nil {
@@ -57,4 +42,18 @@ func (r *RoomService) DeleteRoom(roomid uint, userid uint) error {
 // UpdateRoom implements rooms.DataRoomService.
 func (*RoomService) UpdateRoom(room rooms.Room) (rooms.Room, error) {
 	panic("unimplemented")
+}
+
+// GetAllRooms implements rooms.DataRoomService.
+func (r *RoomService) GetAllRooms() ([]rooms.Room, error) {
+	return r.roomData.GetAllRooms()
+}
+
+// GetRoomByName implements rooms.DataRoomService.
+func (r *RoomService) GetRoomByName(roomName string) ([]rooms.Room, error) {
+	rooms, err := r.roomData.GetRoomByName(roomName)
+	if err != nil {
+		return nil, err
+	}
+	return rooms, nil
 }

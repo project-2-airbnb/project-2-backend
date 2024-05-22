@@ -27,8 +27,8 @@ func (u *userService) GetProfile(userid uint) (data *users.User, err error) {
 }
 
 // LoginAccount implements users.ServiceUserInterface.
-func (u *userService) LoginAccount(email string, password string, usertype string) (data *users.User, token string, err error) {
-	data, err = u.userData.AccountByEmail(email, usertype)
+func (u *userService) LoginAccount(email string, password string) (data *users.User, token string, err error) {
+	data, err = u.userData.AccountByEmail(email)
 	if err != nil {
 		return nil, "", err
 	}
@@ -55,10 +55,6 @@ func (u *userService) RegistrasiAccount(accounts users.User) error {
 
 	if accounts.Password != accounts.RetypePassword {
 		return errors.New("[validation] password dan konfirmasi password tidak cocok")
-	}
-
-	if accounts.UserType != "customer" && accounts.UserType != "hosting" {
-		return errors.New("[validation] tipe user tidak valid")
 	}
 
 	// proses hash password

@@ -25,7 +25,6 @@ func (u *userQuery) CreateAccount(account users.User) error {
 		RetypePassword: account.RetypePassword,
 		Address:        account.Address,
 		PhoneNumber:    account.PhoneNumber,
-		UserType:       account.UserType,
 		PictureProfile: account.PictureProfile,
 	}
 	tx := u.db.Create(&userGorm)
@@ -61,9 +60,9 @@ func (u *userQuery) UpdateAccount(userid uint, account users.User) error {
 }
 
 // AccountByEmail implements users.DataUserInterface.
-func (u *userQuery) AccountByEmail(email string, usertype string) (*users.User, error) {
+func (u *userQuery) AccountByEmail(email string) (*users.User, error) {
 	var userData Users
-	tx := u.db.Where("email = ? AND user_type = ?", email, usertype).First(&userData)
+	tx := u.db.Where("email = ?", email).First(&userData)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
@@ -76,7 +75,6 @@ func (u *userQuery) AccountByEmail(email string, usertype string) (*users.User, 
 		RetypePassword: userData.RetypePassword,
 		Address:        userData.Address,
 		PhoneNumber:    userData.PhoneNumber,
-		UserType:       userData.UserType,
 		PictureProfile: userData.PictureProfile,
 	}
 

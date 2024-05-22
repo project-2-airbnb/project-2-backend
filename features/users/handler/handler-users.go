@@ -36,7 +36,6 @@ func (uh *UserHandler) Register(c echo.Context) error {
 		RetypePassword: newUser.RetypePassword,
 		Address:        newUser.Address,
 		PhoneNumber:    newUser.PhoneNumber,
-		UserType:       newUser.UserType,
 	}
 
 	// Memanggil service layer untuk menyimpan data
@@ -60,7 +59,7 @@ func (uh *UserHandler) Login(c echo.Context) error {
 	}
 
 	// melakukan login
-	_, token, err := uh.userService.LoginAccount(loginReq.Email, loginReq.Password, loginReq.UserType)
+	_, token, err := uh.userService.LoginAccount(loginReq.Email, loginReq.Password)
 	if err != nil {
 		return c.JSON(http.StatusUnauthorized, responses.JSONWebResponse("login gagal: "+err.Error(), nil))
 	}

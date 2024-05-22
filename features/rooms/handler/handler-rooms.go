@@ -106,30 +106,18 @@ func (rh *RoomHandler) Delete(c echo.Context) error {
 }
 
 func (rh *RoomHandler) SearchRoomByname(c echo.Context) error {
-	roomName := c.QueryParam("name")
+	roomName := c.QueryParam("roomname")
+	if roomName == "" {
+		return c.JSON(http.StatusBadRequest, responses.JSONWebResponse("Room name parameter is required", nil))
+	}
+
+	// Call the room service to search for rooms by name
 	rooms, err := rh.roomService.GetRoomByName(roomName)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, responses.JSONWebResponse("gagal mencari room: "+err.Error(), nil))
+		return c.JSON(http.StatusInternalServerError, responses.JSONWebResponse("Failed to search rooms: "+err.Error(), nil))
 	}
 
-	// Konversi data Room menjadi RoomResponse
-	roomResponses := make([]RoomResponse, 0)
-	for _, room := range rooms {
-		roomResponse := RoomResponse{
-			RoomPicture:     room.RoomPicture,
-			RoomName:        room.RoomName,
-			Description:     room.Description,
-			Location:        room.Location,
-			QuantityGuest:   room.QuantityGuest,
-			QuantityBedroom: room.QuantityBedroom,
-			QuantityBed:     room.QuantityBed,
-			Price:           room.Price,
-			Rating:          room.Rating, // Gunakan Rating dari room
-		}
-		roomResponses = append(roomResponses, roomResponse)
-	}
-
-	return c.JSON(http.StatusOK, responses.JSONWebResponse("berhasil mencari room", roomResponses))
+	return c.JSON(http.StatusOK, responses.JSONWebResponse("Rooms found", rooms))
 }
 
 func (rh *RoomHandler) AllRoom(c echo.Context) error {

@@ -68,10 +68,9 @@ func (r *roomQuery) GetAllRooms() ([]rooms.Room, error) {
 
 // GetRoomByName implements rooms.DataRoominterface.
 func (r *roomQuery) GetRoomByName(roomName string) ([]rooms.Room, error) {
-	var roomsList []rooms.Room
-	result := r.db.Where("room_name LIKE ?", "%"+roomName+"%").Find(&roomsList)
-	if result.Error != nil {
-		return nil, result.Error
+	var rooms []rooms.Room
+	if err := r.db.Where("room_name = ?", roomName).Find(&rooms).Error; err != nil {
+		return nil, err
 	}
-	return roomsList, nil
+	return rooms, nil
 }

@@ -37,11 +37,6 @@ func (u *userQuery) CreateAccount(account users.User) error {
 	return nil
 }
 
-// DeleteAccount implements users.DataUserInterface.
-func (u *userQuery) DeleteAccount(userid uint) error {
-	panic("not implemented")
-}
-
 // UpdateAccount implements users.DataUserInterface.
 func (u *userQuery) UpdateAccount(userid uint, account users.User) error {
 	var userGorm Users
@@ -91,4 +86,12 @@ func (u *userQuery) AccountByEmail(email string, usertype string) (*users.User, 
 // AccountById implements users.DataUserInterface.
 func (u *userQuery) AccountById(userid uint) (*users.User, error) {
 	panic("not implemented")
+}
+
+func (u *userQuery) DeleteAccount(userid uint) error {
+	tx := u.db.Delete(&Users{}, userid)
+	if tx.Error != nil {
+		return tx.Error
+	}
+	return nil
 }

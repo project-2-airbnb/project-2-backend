@@ -20,10 +20,6 @@ func New(ud users.DataUserInterface, hash encrypts.HashInterface) users.ServiceU
 
 }
 
-// DeleteAccount implements users.ServiceUserInterface.
-func (u *userService) DeleteAccount(userid uint) error {
-	panic("not implemented")
-}
 
 // GetProfile implements users.ServiceUserInterface.
 func (u *userService) GetProfile(userid uint) (data *users.User, err error) {
@@ -96,4 +92,12 @@ func (u *userService) UpdateProfile(userid uint, accounts users.User) error {
 	accounts.Password = hashedPassword
 
 	return u.userData.UpdateAccount(userid, accounts)
+}
+
+func (us *userService) DeleteAccount(userid uint) error {
+	err := us.userData.DeleteAccount(userid)
+	if err != nil {
+		return err
+	}
+	return nil
 }

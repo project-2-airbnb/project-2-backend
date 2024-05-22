@@ -48,8 +48,27 @@ func (r *roomQuery) DeleteRoom(roomid uint) error {
 }
 
 // UpdateRoom implements rooms.DataRoominterface.
-func (*roomQuery) UpdateRoom(room rooms.Room) (rooms.Room, error) {
-	panic("unimplemented")
+func (r *roomQuery) UpdateRoom(roomid uint, room rooms.Room) error {
+	var roomGorm Rooms
+	tx := r.db.First(&roomGorm, roomid)
+	if tx.Error != nil {
+		return tx.Error
+	}
+
+	roomGorm.RoomName = room.RoomName
+	roomGorm.Description = room.Description
+	roomGorm.Location = room.Location
+	roomGorm.QuantityGuest = room.QuantityGuest
+	roomGorm.QuantityBedroom = room.QuantityBedroom
+	roomGorm.QuantityBed = room.QuantityBed
+	roomGorm.Price = room.Price
+	roomGorm.RoomPicture = room.RoomPicture
+
+	tx = r.db.Save(&roomGorm)
+	if tx.Error != nil {
+		return tx.Error
+	}
+	return nil
 }
 
 // GetAllRooms implements rooms.DataRoominterface.
@@ -105,4 +124,29 @@ func (r *roomQuery) GetRoomByID(roomID uint) (*rooms.Room, error) {
 	}
 
 	return &roomcore, nil
+}
+
+// SelectByUserID implements rooms.DataRoominterface.
+func (r *roomQuery) SelectByUserID(userID uint) (*rooms.Room, error) {
+	var userGorm Rooms
+	tx := r.db.First(&userGorm, userID)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	// mapping
+	var usercore = rooms.Room{
+		RoomID:          userGorm.ID,
+		UserID:          userGorm.UserID,
+		RoomPicture:     userGorm.RoomPicture,
+		RoomName:        userGorm.RoomName,
+		Description:     userGorm.Description,
+		Location:        userGorm.Location,
+		QuantityGuest:   userGorm.QuantityGuest,
+		QuantityBedroom: userGorm.QuantityBedroom,
+		QuantityBed:     userGorm.QuantityBed,
+		Price:           userGorm.Price,
+	}
+
+	return &usercore, nil
 }

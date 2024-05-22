@@ -97,6 +97,7 @@ func (rh *RoomHandler) Delete(c echo.Context) error {
 	}
 	// Memanggil service layer untuk menghapus data
 	if err := rh.roomService.DeleteRoom(uint(idConv), uint(userID)); err != nil {
+
 		if strings.Contains(err.Error(), "validation") {
 			return c.JSON(http.StatusBadRequest, responses.JSONWebResponse("gagal menghapus room: "+err.Error(), nil))
 		}
@@ -182,4 +183,72 @@ func (rh *RoomHandler) GetRoomByID(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, responses.JSONWebResponse("berhasil mendapatkan data", roomResponse))
+}
+
+func (rh *RoomHandler) UpdateRoom(c echo.Context) error {
+	userID := middlewares.ExtractTokenUserId(c)
+	if userID == 0 {
+		return errors.New("user ID not found in context")
+	}
+
+	id := c.Param("id")
+	idConv, errConv := strconv.Atoi(id)
+	if errConv != nil {
+		return c.JSON(http.StatusBadRequest, responses.JSONWebResponse("error convert data: "+errConv.Error(), nil))
+	}
+
+	// Membaca data dari body permintaan
+	updatedRoom := RoomRequest{}
+	errBind := c.Bind(&updatedRoom)
+	if errBind != nil {
+		return c.JSON(http.StatusBadRequest, responses.JSONWebResponse("Error binding data: "+errBind.Error(), nil))
+	}
+
+	// Membaca file gambar ruangan (jika ada)
+	file, err := c.FormFile("room_picture")
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, responses.JSONWebResponse("Gagal membaca file gambar: "+err.Error(), nil))
+	}
+
+	// Jika file ada, unggah ke Cloudinary
+	var imageURL string
+	if file != nil {
+		// Buka file
+		src, err := file.Open()
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, responses.JSONWebResponse("Gagal membuka file gambar: "+err.Error(), nil))
+		}
+		defer src.Close()
+
+		// Upload file ke Cloudinary
+		imageURL, err = updatedRoom.uploadToCloudinary(src, file.Filename)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, responses.JSONWebResponse("Gagal mengunggah gambar: "+err.Error(), nil))
+		}
+	}
+
+	// Mapping request ke struct Room
+	dataRoom := rooms.Room{
+		RoomID:          uint(idConv),
+		UserID:          uint(userID),
+		RoomPicture:     imageURL,
+		RoomName:        updatedRoom.RoomName,
+		Description:     updatedRoom.Description,
+		Location:        updatedRoom.Location,
+		QuantityGuest:   updatedRoom.QuantityGuest,
+		QuantityBedroom: updatedRoom.QuantityBedroom,
+		QuantityBed:     updatedRoom.QuantityBed,
+		Price:           updatedRoom.Price,
+	}
+
+	// Memanggil service layer untuk memperbarui data ruangan
+	if err := rh.roomService.UpdateRoom(uint(idConv), uint(userID), dataRoom); err != nil {
+		if strings.Contains(err.Error(), "validation") {
+			return c.JSON(http.StatusBadRequest, responses.JSONWebResponse("gagal memperbarui room: "+err.Error(), nil))
+		}
+		return c.JSON(http.StatusInternalServerError, responses.JSONWebResponse("gagal memperbarui room: "+err.Error(), nil))
+	}
+
+	return c.JSON(http.StatusOK, responses.JSONWebResponse("berhasil memperbarui room", nil))
+
 }

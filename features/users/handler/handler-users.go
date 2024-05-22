@@ -125,3 +125,18 @@ func (uh *UserHandler) Update(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, responses.JSONWebResponse("perubahan data berhasil", nil))
 }
+
+func (uh *UserHandler) Delete(c echo.Context) error {
+	userid := c.Param("id")
+	idConv, errConv := strconv.Atoi(userid)
+	if errConv != nil {
+		return c.JSON(http.StatusBadRequest, responses.JSONWebResponse("error convert data: "+errConv.Error(), nil))
+	}
+
+	errDelete := uh.userService.DeleteAccount(uint(idConv))
+	if errDelete != nil {
+		return c.JSON(http.StatusInternalServerError, responses.JSONWebResponse("hapus akun gagal: "+errDelete.Error(), nil))
+	}
+
+	return c.JSON(http.StatusOK, responses.JSONWebResponse("hapus akun berhasil", nil))
+}

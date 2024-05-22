@@ -99,11 +99,8 @@ func (u *userQuery) AccountById(userid uint) (*users.User, error) {
 	var user = users.User{
 		FullName:       userData.FullName,
 		Email:          userData.Email,
-		Password:       userData.Password,
-		RetypePassword: userData.RetypePassword,
 		Address:        userData.Address,
 		PhoneNumber:    userData.PhoneNumber,
-		// UserType:       userData.UserType,
 		PictureProfile: userData.PictureProfile,
 	}
 

@@ -32,16 +32,42 @@ func (r *RoomService) AddRoom(room rooms.Room) error {
 
 // DeleteRoom implements rooms.DataRoomService.
 func (r *RoomService) DeleteRoom(roomid uint, userid uint) error {
-	err := r.roomData.DeleteRoom(roomid)
+	if roomid <= 0 {
+		return errors.New("invalid room ID")
+	}
+	cekuserid, err := r.roomData.SelectByUserID(roomid)
 	if err != nil {
 		return err
 	}
-	return nil
+
+	if cekuserid.UserID != userid {
+		return errors.New("user id tidak sesuai")
+	}
+
+	return r.roomData.DeleteRoom(roomid)
 }
 
 // UpdateRoom implements rooms.DataRoomService.
-func (*RoomService) UpdateRoom(room rooms.Room) (rooms.Room, error) {
-	panic("unimplemented")
+func (r *RoomService) UpdateRoom(roomid uint, userid uint, room rooms.Room) error {
+	if roomid == 0 {
+		return errors.New("invalid room ID")
+	}
+
+	if room.RoomName == "" || room.Location == "" || room.Description == "" || room.Price == 0 || room.QuantityBedroom == 0 || room.QuantityGuest == 0 {
+		return errors.New("[validation] roomname/location/description/roomprice/quantitybedroom/quantityguest tidak boleh kosong")
+	}
+
+	cekuserid, err := r.roomData.SelectByUserID(roomid)
+	if err != nil {
+		return err
+	}
+
+	if cekuserid.UserID != userid {
+		return errors.New("user id tidak sesuai")
+	}
+
+	return r.roomData.UpdateRoom(roomid, room)
+
 }
 
 // GetAllRooms implements rooms.DataRoomService.

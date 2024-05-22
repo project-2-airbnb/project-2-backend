@@ -31,16 +31,17 @@ type Facility struct {
 
 type DataRoominterface interface {
 	CreateRoom(room Room) error
-	UpdateRoom(room Room) (Room, error)
+	UpdateRoom(roomid uint, room Room) error
 	DeleteRoom(roomid uint) error
 	GetAllRooms() ([]Room, error)
 	GetRoomByName(roomName string) (*Room, error)
 	GetRoomByID(roomID uint) (*Room, error)
+	SelectByUserID(userID uint) (*Room, error)
 }
 
 type DataRoomService interface {
 	AddRoom(room Room) error
-	UpdateRoom(room Room) (Room, error)
+	UpdateRoom(roomid uint, userid uint, room Room) error
 	DeleteRoom(roomid uint, userid uint) error
 	GetAllRooms() ([]Room, error)
 	GetRoomByName(roomName string) (*Room, error)

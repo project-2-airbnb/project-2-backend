@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"log"
 	"net/http"
 	"project-2/app/middlewares"
 	"project-2/features/rooms"
@@ -29,6 +30,7 @@ func (rh *RoomHandler) Create(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, responses.JSONWebResponse("Unauthorized", nil))
 	}
 
+	log.Println("userID: ", userID)
 	// Membaca data dari body permintaan
 	newRoom := RoomRequest{}
 	errBind := c.Bind(&newRoom)

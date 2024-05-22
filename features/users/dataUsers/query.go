@@ -103,7 +103,7 @@ func (u *userQuery) AccountById(userid uint) (*users.User, error) {
 		RetypePassword: userData.RetypePassword,
 		Address:        userData.Address,
 		PhoneNumber:    userData.PhoneNumber,
-		UserType:       userData.UserType,
+		// UserType:       userData.UserType,
 		PictureProfile: userData.PictureProfile,
 	}
 

@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"log"
 	"net/http"
 	"project-2/app/middlewares"
 	"project-2/features/rooms"
@@ -28,7 +29,7 @@ func (rh *RoomHandler) Create(c echo.Context) error {
 	if userID == 0 {
 		return c.JSON(http.StatusUnauthorized, responses.JSONWebResponse("Unauthorized", nil))
 	}
-
+	log.Println("userid login: ", userID)
 	// Membaca data dari body permintaan
 	newRoom := RoomRequest{}
 	errBind := c.Bind(&newRoom)
@@ -59,6 +60,12 @@ func (rh *RoomHandler) Create(c echo.Context) error {
 		}
 	}
 
+	// Mapping request ke struct Room
+	var facilities []rooms.Facility
+	for _, f := range newRoom.Facilities {
+		facilities = append(facilities, rooms.Facility{FacilityName: f})
+	}
+
 	// Mapping request ke struct User
 	dataRoom := rooms.Room{
 		UserID:          uint(userID),
@@ -70,10 +77,11 @@ func (rh *RoomHandler) Create(c echo.Context) error {
 		QuantityBedroom: newRoom.QuantityBedroom,
 		QuantityBed:     newRoom.QuantityBed,
 		Price:           newRoom.Price,
+		Facilities:      facilities,
 	}
 
 	// Memanggil service layer untuk menyimpan data
-	if err := rh.roomService.AddRoom(dataRoom); err != nil {
+	if err := rh.roomService.AddRoom(dataRoom, facilities); err != nil {
 		if strings.Contains(err.Error(), "validation") {
 			return c.JSON(http.StatusBadRequest, responses.JSONWebResponse("gagal membuat room: "+err.Error(), nil))
 		}

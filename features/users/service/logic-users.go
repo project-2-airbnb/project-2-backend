@@ -2,7 +2,6 @@ package service
 
 import (
 	"errors"
-	"log"
 	"project-2/app/middlewares"
 	"project-2/features/users"
 	"project-2/utils/encrypts"
@@ -43,7 +42,7 @@ func (u *userService) LoginAccount(email string, password string, usertype strin
 	if !isLoginValid {
 		return nil, "", errors.New("email atau password tidak sesuai")
 	}
-	log.Println("data.userid", data.UserID)
+
 	token, errJWT := middlewares.CreateToken(int(data.UserID))
 	if errJWT != nil {
 		return nil, "", errJWT

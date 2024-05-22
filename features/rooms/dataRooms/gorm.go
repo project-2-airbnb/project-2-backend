@@ -10,30 +10,31 @@ import (
 
 type Rooms struct {
 	gorm.Model
-	UserID          uint                            `json:"user_id"`
-	RoomPicture     string                          `json:"room_picture"`
-	RoomName        string                          `json:"room_name"`
-	Description     string                          `json:"description"`
-	Location        string                          `json:"location"`
-	QuantityGuest   int                             `json:"quantity_guest"`
-	QuantityBedroom int                             `json:"quantity_bedroom"`
-	QuantityBed     int                             `json:"quantity_bed"`
-	Price           int                             `json:"price"`
+	UserID          uint
+	RoomPicture     string
+	RoomName        string
+	Description     string `gorm:"type:text"`
+	Location        string
+	QuantityGuest   int
+	QuantityBedroom int
+	QuantityBed     int
+	Price           int
 	RoomFacilitas   []RoomFacilitys                 `gorm:"foreignKey:RoomID"`
 	Reservations    []datareservations.Reservations `gorm:"foreignKey:RoomID"`
 	Reviews         []datareview.Reviews            `gorm:"foreignKey:RoomID"`
+	Facilities      []Facilities                    `gorm:"many2many:room_facilities"`
 }
 
 type RoomFacilitys struct {
 	gorm.Model
-	RoomID     uint       `json:"room_id"`
+	RoomID     uint
 	Facility   Facilities `gorm:"foreignkey:FacilityID"`
-	FacilityID uint       `json:"facility_id"`
+	FacilityID uint
 }
 
 type Facilities struct {
 	gorm.Model
-	FacilityName string `json:"facility_name"`
+	FacilityName string `gorm:"type:text"`
 }
 
 func (r Rooms) ModelToRoom() rooms.Room {

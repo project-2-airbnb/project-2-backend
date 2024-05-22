@@ -3,20 +3,20 @@ package rooms
 import "time"
 
 type Room struct {
-	RoomID          uint      `json:"room_id"`
-	UserID          uint      `json:"user_id"`
-	RoomPicture     string    `json:"room_picture"`
-	RoomName        string    `json:"room_name"`
-	Description     string    `json:"description"`
-	Location        string    `json:"location"`
-	QuantityGuest   int       `json:"quantity_guest"`
-	QuantityBedroom int       `json:"quantity_bedroom"`
-	QuantityBed     int       `json:"quantity_bathroom"`
-	Price           int       `json:"price"`
-	UserType        string    `json:"user_type"`
-	CreatedAt       time.Time `json:"created_at"`
-	UpdatedAt       time.Time `json:"updated_at"`
-	DeletedAt       time.Time `json:"deleted_at"`
+	RoomID          uint       `json:"room_id"`
+	UserID          uint       `json:"user_id"`
+	RoomPicture     string     `json:"room_picture"`
+	RoomName        string     `json:"room_name"`
+	Description     string     `json:"description"`
+	Location        string     `json:"location"`
+	QuantityGuest   int        `json:"quantity_guest"`
+	QuantityBedroom int        `json:"quantity_bedroom"`
+	QuantityBed     int        `json:"quantity_bed"`
+	Price           int        `json:"price"`
+	CreatedAt       time.Time  `json:"created_at"`
+	UpdatedAt       time.Time  `json:"updated_at"`
+	DeletedAt       time.Time  `json:"deleted_at"`
+	Facilities      []Facility `json:"facilities"`
 }
 
 type RoomFacility struct {
@@ -30,14 +30,14 @@ type Facility struct {
 }
 
 type DataRoominterface interface {
-	CreateRoom(room Room) error
+	CreateRoom(room Room, fasilitas []Facility) error
 	UpdateRoom(room Room) (Room, error)
 	DeleteRoom(roomid uint) error
 	GetUserByID(userID uint) (*Room, error)
 }
 
 type DataRoomService interface {
-	AddRoom(room Room) error
+	AddRoom(room Room, fasilitas []Facility) error
 	UpdateRoom(room Room) (Room, error)
 	DeleteRoom(roomid uint, userid uint) error
 }

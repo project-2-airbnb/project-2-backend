@@ -18,14 +18,9 @@ type Users struct {
 	Address        string
 	PhoneNumber    string
 	PictureProfile string
-	UserType       string
 	Rooms          []datarooms.Rooms               `gorm:"foreignKey:UserID"`
 	Reservations   []datareservations.Reservations `gorm:"foreignKey:UserID"`
 	Reviews        []datareview.Reviews            `gorm:"foreignKey:UserID"`
-}
-
-func (u Users) IsValidRole() bool {
-	return u.UserType == "customer" || u.UserType == "hosting"
 }
 
 func (u Users) ModelToUser() users.User {
@@ -36,7 +31,6 @@ func (u Users) ModelToUser() users.User {
 		Address:        u.Address,
 		PhoneNumber:    u.PhoneNumber,
 		PictureProfile: u.PictureProfile,
-		UserType:       u.UserType,
 		CreatedAt:      u.CreatedAt,
 		UpdatedAt:      u.UpdatedAt,
 	}

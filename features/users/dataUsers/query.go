@@ -81,15 +81,31 @@ func (u *userQuery) AccountByEmail(email string) (*users.User, error) {
 	return &users, nil
 }
 
-// AccountById implements users.DataUserInterface.
-func (u *userQuery) AccountById(userid uint) (*users.User, error) {
-	panic("not implemented")
-}
-
 func (u *userQuery) DeleteAccount(userid uint) error {
 	tx := u.db.Delete(&Users{}, userid)
 	if tx.Error != nil {
 		return tx.Error
 	}
 	return nil
+}
+
+func (u *userQuery) AccountById(userid uint) (*users.User, error) {
+	var userData Users
+	tx := u.db.First(&userData, userid)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	// mapping
+	var user = users.User{
+		FullName:       userData.FullName,
+		Email:          userData.Email,
+		Password:       userData.Password,
+		RetypePassword: userData.RetypePassword,
+		Address:        userData.Address,
+		PhoneNumber:    userData.PhoneNumber,
+		UserType:       userData.UserType,
+		PictureProfile: userData.PictureProfile,
+	}
+
+	return &user, nil
 }

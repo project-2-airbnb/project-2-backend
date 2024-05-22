@@ -139,3 +139,18 @@ func (uh *UserHandler) Delete(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, responses.JSONWebResponse("hapus akun berhasil", nil))
 }
+
+func (uh *UserHandler) GetProfile(c echo.Context) error {
+	userid := c.Param("id")
+	idConv, errConv := strconv.Atoi(userid)
+	if errConv != nil {
+		return c.JSON(http.StatusBadRequest, responses.JSONWebResponse("error convert data: "+errConv.Error(), nil))
+	}
+
+	profile, err := uh.userService.GetProfile(uint(idConv))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, responses.JSONWebResponse("gagal mengambil profil: "+err.Error(), nil))
+	}
+
+	return c.JSON(http.StatusOK, responses.JSONWebResponse("berhasil mengambil profil", profile))
+}

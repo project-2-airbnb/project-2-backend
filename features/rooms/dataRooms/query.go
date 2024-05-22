@@ -67,10 +67,42 @@ func (r *roomQuery) GetAllRooms() ([]rooms.Room, error) {
 }
 
 // GetRoomByName implements rooms.DataRoominterface.
-func (r *roomQuery) GetRoomByName(roomName string) ([]rooms.Room, error) {
-	var rooms []rooms.Room
-	if err := r.db.Where("room_name = ?", roomName).Find(&rooms).Error; err != nil {
+func (r *roomQuery) GetRoomByName(roomName string) (*rooms.Room, error) {
+	var roomsGorm Rooms
+	if err := r.db.Where("room_name = ?", roomName).Find(&roomsGorm).Error; err != nil {
 		return nil, err
 	}
-	return rooms, nil
+	// mapping
+	var roomcore = rooms.Room{
+		RoomPicture:     roomsGorm.RoomPicture,
+		RoomName:        roomsGorm.RoomName,
+		QuantityGuest:   roomsGorm.QuantityGuest,
+		QuantityBedroom: roomsGorm.QuantityBedroom,
+		QuantityBed:     roomsGorm.QuantityBed,
+		Price:           roomsGorm.Price,
+	}
+	return &roomcore, nil
+}
+
+// GetRoomByID implements rooms.DataRoominterface.
+func (r *roomQuery) GetRoomByID(roomID uint) (*rooms.Room, error) {
+	var roomGorm Rooms
+	tx := r.db.First(&roomGorm, roomID)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	// mapping
+	var roomcore = rooms.Room{
+		RoomPicture:     roomGorm.RoomPicture,
+		RoomName:        roomGorm.RoomName,
+		Description:     roomGorm.Description,
+		Location:        roomGorm.Location,
+		QuantityGuest:   roomGorm.QuantityGuest,
+		QuantityBedroom: roomGorm.QuantityBedroom,
+		QuantityBed:     roomGorm.QuantityBed,
+		Price:           roomGorm.Price,
+	}
+
+	return &roomcore, nil
 }

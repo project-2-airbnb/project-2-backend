@@ -34,7 +34,8 @@ type DataRoominterface interface {
 	UpdateRoom(room Room) (Room, error)
 	DeleteRoom(roomid uint) error
 	GetAllRooms() ([]Room, error)
-	GetRoomByName(roomName string) ([]Room, error)
+	GetRoomByName(roomName string) (*Room, error)
+	GetRoomByID(roomID uint) (*Room, error)
 }
 
 type DataRoomService interface {
@@ -42,5 +43,6 @@ type DataRoomService interface {
 	UpdateRoom(room Room) (Room, error)
 	DeleteRoom(roomid uint, userid uint) error
 	GetAllRooms() ([]Room, error)
-	GetRoomByName(roomName string) ([]Room, error)
+	GetRoomByName(roomName string) (*Room, error)
+	GetRoomByID(roomID uint) (*Room, error)
 }

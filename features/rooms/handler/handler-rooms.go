@@ -117,7 +117,18 @@ func (rh *RoomHandler) SearchRoomByname(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, responses.JSONWebResponse("Failed to search rooms: "+err.Error(), nil))
 	}
 
-	return c.JSON(http.StatusOK, responses.JSONWebResponse("Rooms found", rooms))
+	// Convert room data to RoomResponse
+	roomResponse := RoomResponse{
+		RoomPicture:     rooms.RoomPicture,
+		RoomName:        rooms.RoomName,
+		QuantityGuest:   rooms.QuantityGuest,
+		QuantityBedroom: rooms.QuantityBedroom,
+		QuantityBed:     rooms.QuantityBed,
+		Price:           rooms.Price,
+		Rating:          rooms.Rating,
+	}
+
+	return c.JSON(http.StatusOK, responses.JSONWebResponse("berhasil mendapatkan data", roomResponse))
 }
 
 func (rh *RoomHandler) AllRoom(c echo.Context) error {
@@ -132,8 +143,6 @@ func (rh *RoomHandler) AllRoom(c echo.Context) error {
 		roomResponse := RoomResponse{
 			RoomPicture:     room.RoomPicture,
 			RoomName:        room.RoomName,
-			Description:     room.Description,
-			Location:        room.Location,
 			QuantityGuest:   room.QuantityGuest,
 			QuantityBedroom: room.QuantityBedroom,
 			QuantityBed:     room.QuantityBed,
@@ -144,4 +153,33 @@ func (rh *RoomHandler) AllRoom(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, responses.JSONWebResponse("berhasil mendapatkan semua room", roomResponses))
+}
+
+func (rh *RoomHandler) GetRoomByID(c echo.Context) error {
+	id := c.Param("id")
+	idConv, errConv := strconv.Atoi(id)
+	if errConv != nil {
+		return c.JSON(http.StatusBadRequest, responses.JSONWebResponse("error convert data: "+errConv.Error(), nil))
+	}
+
+	// Call the room service to get room by ID
+	room, err := rh.roomService.GetRoomByID(uint(idConv))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, responses.JSONWebResponse("Failed to get room by ID: "+err.Error(), nil))
+	}
+
+	// Convert room data to RoomResponse
+	roomResponse := RoomResponse{
+		RoomPicture:     room.RoomPicture,
+		RoomName:        room.RoomName,
+		Description:     room.Description,
+		Location:        room.Location,
+		QuantityGuest:   room.QuantityGuest,
+		QuantityBedroom: room.QuantityBedroom,
+		QuantityBed:     room.QuantityBed,
+		Price:           room.Price,
+		Rating:          room.Rating,
+	}
+
+	return c.JSON(http.StatusOK, responses.JSONWebResponse("berhasil mendapatkan data", roomResponse))
 }

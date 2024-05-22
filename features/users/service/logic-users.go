@@ -74,12 +74,15 @@ func (u *userService) UpdateProfile(userid uint, accounts users.User) error {
 		return errors.New("[validation] password dan konfirmasi password tidak cocok")
 	}
 
-	hashedPassword, errHash := u.hashService.HashPassword(accounts.Password)
-	if errHash != nil {
+	// proses hash password
+	var errHash error
+	if accounts.Password, errHash = u.hashService.HashPassword(accounts.Password); errHash != nil {
 		return errHash
 	}
 
-	accounts.Password = hashedPassword
+	if accounts.RetypePassword, errHash = u.hashService.HashPassword(accounts.RetypePassword); errHash != nil {
+		return errHash
+	}
 
 	return u.userData.UpdateAccount(userid, accounts)
 }

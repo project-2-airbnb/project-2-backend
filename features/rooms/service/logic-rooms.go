@@ -50,10 +50,18 @@ func (r *RoomService) GetAllRooms() ([]rooms.Room, error) {
 }
 
 // GetRoomByName implements rooms.DataRoomService.
-func (r *RoomService) GetRoomByName(roomName string) ([]rooms.Room, error) {
+func (r *RoomService) GetRoomByName(roomName string) (*rooms.Room, error) {
 	rooms, err := r.roomData.GetRoomByName(roomName)
 	if err != nil {
 		return nil, err
 	}
 	return rooms, nil
+}
+
+// GetRoomByID implements rooms.DataRoomService.
+func (r *RoomService) GetRoomByID(roomID uint) (*rooms.Room, error) {
+	if roomID <= 0 {
+		return nil, errors.New("id not valid")
+	}
+	return r.roomData.GetRoomByID(roomID)
 }

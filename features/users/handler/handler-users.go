@@ -152,5 +152,14 @@ func (uh *UserHandler) GetProfile(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, responses.JSONWebResponse("gagal mengambil profil: "+err.Error(), nil))
 	}
 
-	return c.JSON(http.StatusOK, responses.JSONWebResponse("berhasil mengambil profil", profile))
+	// Mapping data profil ke dalam format UserResponse
+	userResponse := UserResponse{
+		FullName:       profile.FullName,
+		Email:          profile.Email,
+		Address:        profile.Address,
+		PhoneNumber:    profile.PhoneNumber,
+		PictureProfile: profile.PictureProfile,
+	}
+
+	return c.JSON(http.StatusOK, responses.JSONWebResponse("berhasil mengambil profil", userResponse))
 }

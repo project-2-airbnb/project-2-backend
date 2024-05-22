@@ -52,26 +52,26 @@ func (*roomQuery) UpdateRoom(room rooms.Room) (rooms.Room, error) {
 	panic("unimplemented")
 }
 
-// GetUserByID implements rooms.DataRoominterface.
-func (r *roomQuery) GetUserByID(userID uint) (*rooms.Room, error) {
-	var roomGorm Rooms
-	tx := r.db.First(&roomGorm, userID)
-	if tx.Error != nil {
-		return nil, tx.Error
+// GetAllRooms implements rooms.DataRoominterface.
+func (r *roomQuery) GetAllRooms() ([]rooms.Room, error) {
+	var roomsList []rooms.Room
+	result := r.db.Model(&rooms.Room{}).
+		Select("rooms.*, COALESCE(AVG(reviews.rating), 0) AS rating").
+		Joins("LEFT JOIN reviews ON reviews.room_id = rooms.id").
+		Group("rooms.id").
+		Find(&roomsList)
+	if result.Error != nil {
+		return nil, result.Error
 	}
+	return roomsList, nil
+}
 
-	// mapping
-	var roomcore = rooms.Room{
-		UserID:          roomGorm.UserID,
-		RoomPicture:     roomGorm.RoomPicture,
-		RoomName:        roomGorm.RoomName,
-		Description:     roomGorm.Description,
-		Location:        roomGorm.Location,
-		QuantityGuest:   roomGorm.QuantityGuest,
-		QuantityBedroom: roomGorm.QuantityBedroom,
-		QuantityBed:     roomGorm.QuantityBed,
-		Price:           roomGorm.Price,
+// GetRoomByName implements rooms.DataRoominterface.
+func (r *roomQuery) GetRoomByName(roomName string) ([]rooms.Room, error) {
+	var roomsList []rooms.Room
+	result := r.db.Where("room_name LIKE ?", "%"+roomName+"%").Find(&roomsList)
+	if result.Error != nil {
+		return nil, result.Error
 	}
-
-	return &roomcore, nil
+	return roomsList, nil
 }

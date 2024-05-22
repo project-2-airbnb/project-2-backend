@@ -13,7 +13,7 @@ type Room struct {
 	QuantityBedroom int       `json:"quantity_bedroom"`
 	QuantityBed     int       `json:"quantity_bathroom"`
 	Price           int       `json:"price"`
-	UserType        string    `json:"user_type"`
+	Rating          float32   `json:"rating"`
 	CreatedAt       time.Time `json:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at"`
 	DeletedAt       time.Time `json:"deleted_at"`
@@ -33,11 +33,14 @@ type DataRoominterface interface {
 	CreateRoom(room Room) error
 	UpdateRoom(room Room) (Room, error)
 	DeleteRoom(roomid uint) error
-	GetUserByID(userID uint) (*Room, error)
+	GetAllRooms() ([]Room, error)
+	GetRoomByName(roomName string) ([]Room, error)
 }
 
 type DataRoomService interface {
 	AddRoom(room Room) error
 	UpdateRoom(room Room) (Room, error)
 	DeleteRoom(roomid uint, userid uint) error
+	GetAllRooms() ([]Room, error)
+	GetRoomByName(roomName string) ([]Room, error)
 }

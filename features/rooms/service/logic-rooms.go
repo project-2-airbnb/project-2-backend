@@ -43,3 +43,17 @@ func (r *RoomService) DeleteRoom(roomid uint, userid uint) error {
 func (*RoomService) UpdateRoom(room rooms.Room) (rooms.Room, error) {
 	panic("unimplemented")
 }
+
+// GetAllRooms implements rooms.DataRoomService.
+func (r *RoomService) GetAllRooms() ([]rooms.Room, error) {
+	return r.roomData.GetAllRooms()
+}
+
+// GetRoomByName implements rooms.DataRoomService.
+func (r *RoomService) GetRoomByName(roomName string) ([]rooms.Room, error) {
+	rooms, err := r.roomData.GetRoomByName(roomName)
+	if err != nil {
+		return nil, err
+	}
+	return rooms, nil
+}

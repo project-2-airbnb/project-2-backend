@@ -20,12 +20,6 @@ func New(ud users.DataUserInterface, hash encrypts.HashInterface) users.ServiceU
 
 }
 
-
-// GetProfile implements users.ServiceUserInterface.
-func (u *userService) GetProfile(userid uint) (data *users.User, err error) {
-	panic("not implemented")
-}
-
 // LoginAccount implements users.ServiceUserInterface.
 func (u *userService) LoginAccount(email string, password string, usertype string) (data *users.User, token string, err error) {
 	data, err = u.userData.AccountByEmail(email, usertype)
@@ -100,4 +94,12 @@ func (us *userService) DeleteAccount(userid uint) error {
 		return err
 	}
 	return nil
+}
+
+func (us *userService) GetProfile(userid uint) (*users.User, error) {
+	profile, err := us.userData.AccountById(userid)
+	if err != nil {
+		return nil, err
+	}
+	return profile, nil
 }

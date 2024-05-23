@@ -22,6 +22,8 @@ type Rooms struct {
 	RoomFacilitas   []RoomFacilitys                 `gorm:"foreignKey:RoomID"`
 	Reservations    []datareservations.Reservations `gorm:"foreignKey:RoomID"`
 	Reviews         []datareview.Reviews            `gorm:"foreignKey:RoomID"`
+	Facilities      []Facilities                    `gorm:"many2many:room_facilities;"` // Tambahkan relasi dengan facility
+	FacilityNames   []string                        `gorm:"-" json:"facility_names"`    // Menyimpan nama fasilitas
 }
 
 type RoomFacilitys struct {

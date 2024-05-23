@@ -18,7 +18,14 @@ func New(db *gorm.DB) rooms.DataRoominterface {
 
 // CreateRoom implements rooms.DataRoominterface.
 func (r *roomQuery) CreateRoom(room rooms.Room) error {
-	roomsGorm := Rooms{
+	// Begin a transaction
+	tx := r.db.Begin()
+	if tx.Error != nil {
+		return tx.Error
+	}
+
+	// Convert rooms.Room to datarooms.Rooms
+	newRoom := Rooms{
 		UserID:          room.UserID,
 		RoomPicture:     room.RoomPicture,
 		RoomName:        room.RoomName,
@@ -29,13 +36,27 @@ func (r *roomQuery) CreateRoom(room rooms.Room) error {
 		QuantityBed:     room.QuantityBed,
 		Price:           room.Price,
 	}
-	tx := r.db.Create(&roomsGorm)
 
-	if tx.Error != nil {
-		return tx.Error
+	// Create the room
+	if err := tx.Create(&newRoom).Error; err != nil {
+		tx.Rollback()
+		return err
 	}
 
-	return nil
+	// Create the room facilities
+	for _, facility := range room.Facilities {
+		roomFacility := RoomFacilitys{
+			RoomID:     newRoom.ID,
+			FacilityID: facility.FacilityID,
+		}
+		if err := tx.Create(&roomFacility).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	// Commit the transaction
+	return tx.Commit().Error
 }
 
 // DeleteRoom implements rooms.DataRoominterface.
@@ -49,34 +70,71 @@ func (r *roomQuery) DeleteRoom(roomid uint) error {
 
 // UpdateRoom implements rooms.DataRoominterface.
 func (r *roomQuery) UpdateRoom(roomid uint, room rooms.Room) error {
-	var roomGorm Rooms
-	tx := r.db.First(&roomGorm, roomid)
+	// Begin a transaction
+	tx := r.db.Begin()
 	if tx.Error != nil {
 		return tx.Error
 	}
+	defer func() {
+		if p := recover(); p != nil {
+			tx.Rollback()
+		}
+	}()
 
-	roomGorm.RoomName = room.RoomName
-	roomGorm.Description = room.Description
-	roomGorm.Location = room.Location
-	roomGorm.QuantityGuest = room.QuantityGuest
-	roomGorm.QuantityBedroom = room.QuantityBedroom
-	roomGorm.QuantityBed = room.QuantityBed
-	roomGorm.Price = room.Price
-	roomGorm.RoomPicture = room.RoomPicture
-
-	tx = r.db.Save(&roomGorm)
-	if tx.Error != nil {
-		return tx.Error
+	// Find the room to update
+	var existingRoom Rooms
+	if err := tx.First(&existingRoom, roomid).Error; err != nil {
+		tx.Rollback()
+		return err
 	}
-	return nil
+
+	// Update fields
+	existingRoom.UserID = room.UserID
+	existingRoom.RoomPicture = room.RoomPicture
+	existingRoom.RoomName = room.RoomName
+	existingRoom.Description = room.Description
+	existingRoom.Location = room.Location
+	existingRoom.QuantityGuest = room.QuantityGuest
+	existingRoom.QuantityBedroom = room.QuantityBedroom
+	existingRoom.QuantityBed = room.QuantityBed
+	existingRoom.Price = room.Price
+
+	// Save the changes
+	if err := tx.Save(&existingRoom).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// Delete existing room facilities
+	if err := tx.Where("room_id = ?", roomid).Delete(&RoomFacilitys{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// Create the room facilities
+	for _, facility := range room.Facilities {
+		roomFacility := RoomFacilitys{
+			RoomID:     roomid,
+			FacilityID: facility.FacilityID,
+		}
+		if err := tx.Create(&roomFacility).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	// Commit the transaction
+	return tx.Commit().Error
 }
 
 // GetAllRooms implements rooms.DataRoominterface.
-func (r *roomQuery) GetAllRooms() ([]rooms.Room, error) {
+func (r *roomQuery) GetAllRooms(userid uint) ([]rooms.Room, error) {
 	var roomsList []rooms.Room
 	result := r.db.Model(&rooms.Room{}).
 		Select("rooms.*, COALESCE(AVG(reviews.rating), 0) AS rating").
 		Joins("LEFT JOIN reviews ON reviews.room_id = rooms.id").
+		Preload("Facilities").
+		Where("rooms.user_id != ?", userid).
 		Group("rooms.id").
 		Find(&roomsList)
 	if result.Error != nil {

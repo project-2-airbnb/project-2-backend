@@ -29,38 +29,36 @@ func (rh *RoomHandler) Create(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, responses.JSONWebResponse("Unauthorized", nil))
 	}
 
-	// Membaca data dari body permintaan
+	// Read data from the request body
 	newRoom := RoomRequest{}
 	errBind := c.Bind(&newRoom)
 	if errBind != nil {
 		return c.JSON(http.StatusBadRequest, responses.JSONWebResponse("Error binding data: "+errBind.Error(), nil))
 	}
 
-	// Membaca file gambar pengguna (jika ada)
+	// Read user image file (if any)
 	file, err := c.FormFile("room_picture")
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, responses.JSONWebResponse("Gagal membaca file gambar: "+err.Error(), nil))
+	if err != nil && !errors.Is(err, http.ErrMissingFile) {
+		return c.JSON(http.StatusBadRequest, responses.JSONWebResponse("Failed to read image file: "+err.Error(), nil))
 	}
 
-	// Jika file ada, unggah ke Cloudinary
+	// If a file exists, upload to Cloudinary
 	var imageURL string
 	if file != nil {
-		// Buka file
 		src, err := file.Open()
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, responses.JSONWebResponse("Gagal membuka file gambar: "+err.Error(), nil))
+			return c.JSON(http.StatusInternalServerError, responses.JSONWebResponse("Failed to open image file: "+err.Error(), nil))
 		}
 		defer src.Close()
 
-		// Upload file ke Cloudinary
 		imageURL, err = newRoom.uploadToCloudinary(src, file.Filename)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, responses.JSONWebResponse("Gagal mengunggah gambar: "+err.Error(), nil))
+			return c.JSON(http.StatusInternalServerError, responses.JSONWebResponse("Failed to upload image: "+err.Error(), nil))
 		}
 	}
 
-	// Mapping request ke struct User
-	dataRoom := rooms.Room{
+	// Construct the room data
+	room := rooms.Room{
 		UserID:          uint(userID),
 		RoomPicture:     imageURL,
 		RoomName:        newRoom.RoomName,
@@ -70,17 +68,15 @@ func (rh *RoomHandler) Create(c echo.Context) error {
 		QuantityBedroom: newRoom.QuantityBedroom,
 		QuantityBed:     newRoom.QuantityBed,
 		Price:           newRoom.Price,
+		Facilities:      newRoom.toFacilities(),
+	}
+	// Add the room using the service layer
+	err = rh.roomService.AddRoom(room)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, responses.JSONWebResponse("Failed to add room: "+err.Error(), nil))
 	}
 
-	// Memanggil service layer untuk menyimpan data
-	if err := rh.roomService.AddRoom(dataRoom); err != nil {
-		if strings.Contains(err.Error(), "validation") {
-			return c.JSON(http.StatusBadRequest, responses.JSONWebResponse("gagal membuat room: "+err.Error(), nil))
-		}
-		return c.JSON(http.StatusInternalServerError, responses.JSONWebResponse("gagal membuat room: "+err.Error(), nil))
-	}
-
-	return c.JSON(http.StatusCreated, responses.JSONWebResponse("berhasil membuat room", nil))
+	return c.JSON(http.StatusCreated, responses.JSONWebResponse("Room successfully created", nil))
 }
 
 func (rh *RoomHandler) Delete(c echo.Context) error {
@@ -106,53 +102,45 @@ func (rh *RoomHandler) Delete(c echo.Context) error {
 	return c.JSON(http.StatusOK, responses.JSONWebResponse("berhasil menghapus room", nil))
 }
 
-func (rh *RoomHandler) SearchRoomByname(c echo.Context) error {
-	roomName := c.QueryParam("roomname")
-	if roomName == "" {
-		return c.JSON(http.StatusBadRequest, responses.JSONWebResponse("Room name parameter is required", nil))
-	}
-
-	// Call the room service to search for rooms by name
-	rooms, err := rh.roomService.GetRoomByName(roomName)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, responses.JSONWebResponse("Failed to search rooms: "+err.Error(), nil))
-	}
-
-	// Convert room data to RoomResponse
-	roomResponse := RoomResponse{
-		RoomPicture:     rooms.RoomPicture,
-		RoomName:        rooms.RoomName,
-		QuantityGuest:   rooms.QuantityGuest,
-		QuantityBedroom: rooms.QuantityBedroom,
-		QuantityBed:     rooms.QuantityBed,
-		Price:           rooms.Price,
-		Rating:          rooms.Rating,
-	}
-
-	return c.JSON(http.StatusOK, responses.JSONWebResponse("berhasil mendapatkan data", roomResponse))
-}
-
 func (rh *RoomHandler) AllRoom(c echo.Context) error {
-	rooms, err := rh.roomService.GetAllRooms()
+	roomName := c.QueryParam("roomname")
+	// Extract user ID from authentication context
+	userID := middlewares.ExtractTokenUserId(c)
+	if userID == 0 {
+		return c.JSON(http.StatusUnauthorized, responses.JSONWebResponse("Unauthorized", nil))
+	}
+
+	// Panggil GetAllRooms dari service layer
+	rooms, err := rh.roomService.GetAllRooms(roomName, uint(userID))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, responses.JSONWebResponse("gagal mendapatkan semua room: "+err.Error(), nil))
 	}
 
-	// Konversi data Room menjadi RoomResponse
-	roomResponses := make([]RoomResponse, 0)
+	// Konversi []*rooms.Room ke []RoomResponse
+	var roomResponses []RoomResponse
 	for _, room := range rooms {
+		// Convert facilities to slice of facility names
+		var facilityNames []string
+		for _, facility := range room.Facilities {
+			facilityNames = append(facilityNames, facility.FacilityName)
+		}
+
 		roomResponse := RoomResponse{
 			RoomPicture:     room.RoomPicture,
 			RoomName:        room.RoomName,
+			Description:     room.Description,
+			Location:        room.Location,
 			QuantityGuest:   room.QuantityGuest,
 			QuantityBedroom: room.QuantityBedroom,
 			QuantityBed:     room.QuantityBed,
 			Price:           room.Price,
 			Rating:          room.Rating,
+			Facilities:      facilityNames,
 		}
 		roomResponses = append(roomResponses, roomResponse)
 	}
 
+	// Kirim respons JSON yang berisi data ruangan
 	return c.JSON(http.StatusOK, responses.JSONWebResponse("berhasil mendapatkan semua room", roomResponses))
 }
 
@@ -239,6 +227,7 @@ func (rh *RoomHandler) UpdateRoom(c echo.Context) error {
 		QuantityBedroom: updatedRoom.QuantityBedroom,
 		QuantityBed:     updatedRoom.QuantityBed,
 		Price:           updatedRoom.Price,
+		Facilities:      updatedRoom.toFacilities(),
 	}
 
 	// Memanggil service layer untuk memperbarui data ruangan

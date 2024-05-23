@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 	"os"
+	"project-2/features/rooms"
 
 	"github.com/cloudinary/cloudinary-go"
 	"github.com/cloudinary/cloudinary-go/api/uploader"
@@ -18,6 +19,7 @@ type RoomRequest struct {
 	QuantityBedroom int    `json:"quantity_bedroom" form:"quantity_bedroom"`
 	QuantityBed     int    `json:"quantity_bed" form:"quantity_bed"`
 	Price           int    `json:"price" form:"price"`
+	Facilities      []int  `json:"facilities" form:"facilities[]"`
 }
 
 func (r RoomRequest) uploadToCloudinary(file io.Reader, filename string) (string, error) {
@@ -41,4 +43,13 @@ func (r RoomRequest) uploadToCloudinary(file io.Reader, filename string) (string
 	// Ambil URL publik dari hasil unggah
 	publicURL := uploadResult.URL
 	return publicURL, nil
+}
+
+// Helper method to convert RoomRequest facilities to rooms.Facility
+func (r *RoomRequest) toFacilities() []rooms.Facility {
+	var facilities []rooms.Facility
+	for _, f := range r.Facilities {
+		facilities = append(facilities, rooms.Facility{FacilityID: uint(f)})
+	}
+	return facilities
 }

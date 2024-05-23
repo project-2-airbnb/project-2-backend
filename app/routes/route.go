@@ -36,5 +36,5 @@ func InitRouter(e *echo.Echo, db *gorm.DB) {
 	e.DELETE("/rooms/:id", roomsHandlerAPI.Delete, middlewares.JWTMiddleware())
 	e.GET("/rooms", roomsHandlerAPI.AllRoom, middlewares.JWTMiddleware())
 	e.GET("/rooms/:id", roomsHandlerAPI.GetRoomByID, middlewares.JWTMiddleware())
-	e.GET("/rooms/search", roomsHandlerAPI.SearchRoomByname, middlewares.JWTMiddleware())
+	e.PUT("/rooms/:id", roomsHandlerAPI.UpdateRoom, middlewares.JWTMiddleware())
 }

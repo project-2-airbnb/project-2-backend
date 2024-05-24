@@ -1,6 +1,7 @@
 package datarooms
 
 import (
+	"log"
 	"project-2/features/rooms"
 
 	"gorm.io/gorm"
@@ -129,54 +130,82 @@ func (r *roomQuery) UpdateRoom(roomid uint, room rooms.Room) error {
 
 // GetAllRooms implements rooms.DataRoominterface.
 func (r *roomQuery) GetAllRooms() ([]rooms.Room, error) {
-	var roomsList []rooms.Room
-	result := r.db.Model(&Rooms{}).
-		Select("rooms.*, COALESCE(AVG(reviews.rating), 0) AS rating").
-		Joins("LEFT JOIN reviews ON reviews.room_id = rooms.id").
-		Joins("LEFT JOIN users ON users.id = rooms.user_id").
-		Preload("Facilities").
-		Group("rooms.id").
-		Find(&roomsList)
+	var roomsList []Rooms
+	result := r.db.Preload("RoomFacilitas.Facility").Find(&roomsList)
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	return roomsList, nil
+
+	// Fill FacilityNames for each room
+	for i := range roomsList {
+		roomsList[i].FacilityNames = extractFacilityNames(roomsList[i].RoomFacilitas)
+	}
+
+	// Convert Rooms to rooms.Room
+	var resultRoomsList []rooms.Room
+	for _, room := range roomsList {
+		resultRoomsList = append(resultRoomsList, rooms.Room{
+			UserID:          room.UserID,
+			RoomPicture:     room.RoomPicture,
+			RoomName:        room.RoomName,
+			Description:     room.Description,
+			Location:        room.Location,
+			QuantityGuest:   room.QuantityGuest,
+			QuantityBedroom: room.QuantityBedroom,
+			QuantityBed:     room.QuantityBed,
+			Price:           room.Price,
+			FacilityNames:   room.FacilityNames,
+		})
+	}
+	return resultRoomsList, nil
+}
+
+func extractFacilityNames(roomFacilities []RoomFacilitys) []string {
+	var facilityNames []string
+	for _, rf := range roomFacilities {
+		facilityNames = append(facilityNames, rf.Facility.FacilityName)
+	}
+	return facilityNames
 }
 
 // GetRoomByName implements rooms.DataRoominterface.
-func (r *roomQuery) GetRoomByName(roomName string) (*rooms.Room, error) {
-	var roomGorm Rooms
-	tx := r.db.Preload("Facilities").Where("room_name = ?", roomName).First(&roomGorm)
+func (r *roomQuery) GetRoomByName(roomName string) ([]rooms.Room, error) {
+	var roomsList []Rooms
+	tx := r.db.Preload("RoomFacilitas.Facility").Where("room_name = ?", roomName).First(&roomsList)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
 
-	// Mapping data ke struktur Room
-	var roomCore rooms.Room
-	roomCore.RoomID = roomGorm.ID
-	roomCore.RoomPicture = roomGorm.RoomPicture
-	roomCore.RoomName = roomGorm.RoomName
-	roomCore.Description = roomGorm.Description
-	roomCore.Location = roomGorm.Location
-	roomCore.QuantityGuest = roomGorm.QuantityGuest
-	roomCore.QuantityBedroom = roomGorm.QuantityBedroom
-	roomCore.QuantityBed = roomGorm.QuantityBed
-	roomCore.Price = roomGorm.Price
-	roomCore.Facilities = make([]rooms.Facility, len(roomGorm.Facilities))
-	for i, facility := range roomGorm.Facilities {
-		roomCore.Facilities[i] = rooms.Facility{
-			FacilityID:   facility.ID,
-			FacilityName: facility.FacilityName,
-		}
+	// Fill FacilityNames for each room
+	for i := range roomsList {
+		roomsList[i].FacilityNames = extractFacilityNames(roomsList[i].RoomFacilitas)
 	}
 
-	return &roomCore, nil
+	// Convert Rooms to rooms.Room
+	var resultRoomsList []rooms.Room
+	for _, room := range roomsList {
+		resultRoomsList = append(resultRoomsList, rooms.Room{
+			UserID:          room.UserID,
+			RoomPicture:     room.RoomPicture,
+			RoomName:        room.RoomName,
+			Description:     room.Description,
+			Location:        room.Location,
+			QuantityGuest:   room.QuantityGuest,
+			QuantityBedroom: room.QuantityBedroom,
+			QuantityBed:     room.QuantityBed,
+			Price:           room.Price,
+			FacilityNames:   room.FacilityNames,
+		})
+	}
+	log.Println("roomsList: ", resultRoomsList)
+	return resultRoomsList, nil
+
 }
 
 // GetRoomByID implements rooms.DataRoominterface.
 func (r *roomQuery) GetRoomByID(roomID uint) (*rooms.Room, error) {
 	var roomGorm Rooms
-	tx := r.db.Preload("Facilities").First(&roomGorm, roomID)
+	tx := r.db.Preload("RoomFacilitas.Facility").First(&roomGorm, roomID)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
@@ -192,13 +221,6 @@ func (r *roomQuery) GetRoomByID(roomID uint) (*rooms.Room, error) {
 	roomCore.QuantityBedroom = roomGorm.QuantityBedroom
 	roomCore.QuantityBed = roomGorm.QuantityBed
 	roomCore.Price = roomGorm.Price
-	roomCore.Facilities = make([]rooms.Facility, len(roomGorm.Facilities))
-	for i, facility := range roomGorm.Facilities {
-		roomCore.Facilities[i] = rooms.Facility{
-			FacilityID:   facility.ID,
-			FacilityName: facility.FacilityName,
-		}
-	}
 
 	return &roomCore, nil
 }
@@ -226,4 +248,25 @@ func (r *roomQuery) SelectByUserID(userID uint) (*rooms.Room, error) {
 	}
 
 	return &usercore, nil
+}
+
+// FacilitybyID implements rooms.DataRoominterface.
+func (r *roomQuery) FacilitybyID(roomID uint) ([]rooms.Facility, error) {
+	var facilityGorm []RoomFacilitys
+	tx := r.db.Preload("Facility").Where("room_id = ?", roomID).Find(&facilityGorm)
+
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	var facilityCore []rooms.Facility
+
+	for _, facility := range facilityGorm {
+		facilityCore = append(facilityCore, rooms.Facility{
+			FacilityID:   facility.FacilityID,
+			FacilityName: facility.Facility.FacilityName,
+		})
+	}
+
+	return facilityCore, nil
 }

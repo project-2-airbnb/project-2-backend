@@ -77,14 +77,14 @@ func (r *RoomService) UpdateRoom(roomid uint, userid uint, room rooms.Room) erro
 }
 
 // GetAllRooms implements rooms.DataRoomService.
-func (r *RoomService) GetAllRooms(roomName string) ([]*rooms.Room, error) {
+func (r *RoomService) GetAllRooms(roomName string) ([]rooms.Room, error) {
 	if roomName != "" {
 		// Jika nama ruangan diberikan, lakukan pencarian berdasarkan nama ruangan
 		room, err := r.roomData.GetRoomByName(roomName)
 		if err != nil {
 			return nil, err
 		}
-		return []*rooms.Room{room}, nil
+		return room, nil
 	}
 
 	// Jika tidak ada nama ruangan yang diberikan, kembalikan semua ruangan
@@ -94,11 +94,16 @@ func (r *RoomService) GetAllRooms(roomName string) ([]*rooms.Room, error) {
 	}
 
 	// Konversi slice rooms.Room menjadi []*rooms.Room
-	var allRoomsPtr []*rooms.Room
+	var allRoomsPtr []rooms.Room
 	for i := range allRooms {
-		allRoomsPtr = append(allRoomsPtr, &allRooms[i])
-	}
+		resultfasilies, err := r.roomData.FacilitybyID(allRooms[i].RoomID)
+		if err != nil {
+			return nil, err
+		}
 
+		allRooms[i].Facilities = resultfasilies
+		allRoomsPtr = append(allRoomsPtr, allRooms[i])
+	}
 	return allRoomsPtr, nil
 }
 
@@ -108,12 +113,4 @@ func (r *RoomService) GetRoomByID(roomID uint) (*rooms.Room, error) {
 		return nil, errors.New("id not valid")
 	}
 	return r.roomData.GetRoomByID(roomID)
-}
-
-func (r *RoomService) GetUserRooms(userID uint) (*rooms.Room, error) {
-	rooms, err := r.roomData.SelectByUserID(userID)
-	if err != nil {
-		return nil, err
-	}
-	return rooms, nil
 }

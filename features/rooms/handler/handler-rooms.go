@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"log"
 	"net/http"
 	"project-2/app/middlewares"
 	"project-2/features/rooms"
@@ -123,7 +124,6 @@ func (rh *RoomHandler) AllRoom(c echo.Context) error {
 		roomResponse := RoomResponse{
 			RoomPicture:     room.RoomPicture,
 			RoomName:        room.RoomName,
-			FullName:        room.FullName,
 			QuantityGuest:   room.QuantityGuest,
 			QuantityBedroom: room.QuantityBedroom,
 			QuantityBed:     room.QuantityBed,
@@ -132,6 +132,7 @@ func (rh *RoomHandler) AllRoom(c echo.Context) error {
 			Facilities:      facilityNames,
 		}
 		roomResponses = append(roomResponses, roomResponse)
+		log.Println("data fasilitas", roomResponses)
 	}
 
 	// Kirim respons JSON yang berisi data ruangan
@@ -254,6 +255,8 @@ func (rh *RoomHandler) GetRoomByUserID(c echo.Context) error {
 	roomResponse := RoomResponse{
 		RoomPicture:     userRooms.RoomPicture,
 		RoomName:        userRooms.RoomName,
+		Description:     userRooms.Description,
+		Location:        userRooms.Location,
 		QuantityGuest:   userRooms.QuantityGuest,
 		QuantityBedroom: userRooms.QuantityBedroom,
 		QuantityBed:     userRooms.QuantityBed,

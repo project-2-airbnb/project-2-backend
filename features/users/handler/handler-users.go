@@ -2,9 +2,9 @@ package handler
 
 import (
 	"net/http"
+	"project-2/app/middlewares"
 	"project-2/features/users"
 	"project-2/utils/responses"
-	"strconv"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -69,10 +69,10 @@ func (uh *UserHandler) Login(c echo.Context) error {
 }
 
 func (uh *UserHandler) Update(c echo.Context) error {
-	userid := c.Param("id")
-	idConv, errConv := strconv.Atoi(userid)
-	if errConv != nil {
-		return c.JSON(http.StatusBadRequest, responses.JSONWebResponse("error convert data: "+errConv.Error(), nil))
+	// Extract user ID from authentication context
+	userID := middlewares.ExtractTokenUserId(c)
+	if userID == 0 {
+		return c.JSON(http.StatusUnauthorized, responses.JSONWebResponse("Unauthorized", nil))
 	}
 
 	// membaca data dari request body
@@ -115,7 +115,7 @@ func (uh *UserHandler) Update(c echo.Context) error {
 		PictureProfile: imageURL,
 	}
 	// memanggil/mengirimkan data ke method service layer
-	errInsert := uh.userService.UpdateProfile(uint(idConv), dataUser)
+	errInsert := uh.userService.UpdateProfile(uint(userID), dataUser)
 	if errInsert != nil {
 		if strings.Contains(errInsert.Error(), "validation") {
 			return c.JSON(http.StatusBadRequest, responses.JSONWebResponse("perubahan data gagal: "+errInsert.Error(), nil))
@@ -126,13 +126,13 @@ func (uh *UserHandler) Update(c echo.Context) error {
 }
 
 func (uh *UserHandler) Delete(c echo.Context) error {
-	userid := c.Param("id")
-	idConv, errConv := strconv.Atoi(userid)
-	if errConv != nil {
-		return c.JSON(http.StatusBadRequest, responses.JSONWebResponse("error convert data: "+errConv.Error(), nil))
+	// Extract user ID from authentication context
+	userID := middlewares.ExtractTokenUserId(c)
+	if userID == 0 {
+		return c.JSON(http.StatusUnauthorized, responses.JSONWebResponse("Unauthorized", nil))
 	}
 
-	errDelete := uh.userService.DeleteAccount(uint(idConv))
+	errDelete := uh.userService.DeleteAccount(uint(userID))
 	if errDelete != nil {
 		return c.JSON(http.StatusInternalServerError, responses.JSONWebResponse("hapus akun gagal: "+errDelete.Error(), nil))
 	}
@@ -141,13 +141,13 @@ func (uh *UserHandler) Delete(c echo.Context) error {
 }
 
 func (uh *UserHandler) GetProfile(c echo.Context) error {
-	userid := c.Param("id")
-	idConv, errConv := strconv.Atoi(userid)
-	if errConv != nil {
-		return c.JSON(http.StatusBadRequest, responses.JSONWebResponse("error convert data: "+errConv.Error(), nil))
+	// Extract user ID from authentication context
+	userID := middlewares.ExtractTokenUserId(c)
+	if userID == 0 {
+		return c.JSON(http.StatusUnauthorized, responses.JSONWebResponse("Unauthorized", nil))
 	}
 
-	profile, err := uh.userService.GetProfile(uint(idConv))
+	profile, err := uh.userService.GetProfile(uint(userID))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, responses.JSONWebResponse("gagal mengambil profil: "+err.Error(), nil))
 	}

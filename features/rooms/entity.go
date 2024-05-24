@@ -7,6 +7,7 @@ type Room struct {
 	UserID          uint       `json:"user_id"`
 	RoomPicture     string     `json:"room_picture"`
 	RoomName        string     `json:"room_name"`
+	FullName        string     `json:"full_name"`
 	Description     string     `json:"description"`
 	Location        string     `json:"location"`
 	QuantityGuest   int        `json:"quantity_guest"`
@@ -18,6 +19,7 @@ type Room struct {
 	CreatedAt       time.Time  `json:"created_at"`
 	UpdatedAt       time.Time  `json:"updated_at"`
 	DeletedAt       time.Time  `json:"deleted_at"`
+	FacilityNames   []string   `gorm:"-" json:"facility_names"`
 }
 
 type Facility struct {
@@ -34,7 +36,7 @@ type DataRoominterface interface {
 	CreateRoom(room Room) error
 	UpdateRoom(roomid uint, room Room) error
 	DeleteRoom(roomid uint) error
-	GetAllRooms(userid uint) ([]Room, error)
+	GetAllRooms() ([]Room, error)
 	GetRoomByName(roomName string) (*Room, error)
 	GetRoomByID(roomID uint) (*Room, error)
 	SelectByUserID(userID uint) (*Room, error)
@@ -44,6 +46,7 @@ type DataRoomService interface {
 	AddRoom(room Room) error
 	UpdateRoom(roomid uint, userid uint, room Room) error
 	DeleteRoom(roomid uint, userid uint) error
-	GetAllRooms(roomName string, userid uint) ([]*Room, error)
+	GetAllRooms(roomName string) ([]*Room, error)
 	GetRoomByID(roomID uint) (*Room, error)
+	GetUserRooms(userID uint) (*Room, error)
 }

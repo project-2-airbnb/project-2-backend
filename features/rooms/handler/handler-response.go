@@ -10,6 +10,6 @@ type RoomResponse struct {
 	QuantityBedroom int      `json:"quantity_bedroom,omitempty" form:"quantity_bedroom"`
 	QuantityBed     int      `json:"quantity_bed,omitempty" form:"quantity_bed"`
 	Price           int      `json:"price,omitempty" form:"price"`
-	Rating          float32  `json:"rating,omitempty" form:"rating"`
+	Rating          float32  `json:"rating" form:"rating"`
 	Facilities      []string `json:"facilities" form:"facilities"`
 }

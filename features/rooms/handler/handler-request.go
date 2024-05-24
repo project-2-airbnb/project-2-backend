@@ -19,7 +19,7 @@ type RoomRequest struct {
 	QuantityBedroom int    `json:"quantity_bedroom" form:"quantity_bedroom"`
 	QuantityBed     int    `json:"quantity_bed" form:"quantity_bed"`
 	Price           int    `json:"price" form:"price"`
-	Facilities      []int  `json:"facilities" form:"facilities[]"`
+	Facilities      []int  `json:"facilities" form:"facilities"`
 }
 
 func (r RoomRequest) uploadToCloudinary(file io.Reader, filename string) (string, error) {

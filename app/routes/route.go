@@ -11,7 +11,6 @@ import (
 	"project-2/utils/encrypts"
 
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 	"gorm.io/gorm"
 )
 
@@ -25,11 +24,6 @@ func InitRouter(e *echo.Echo, db *gorm.DB) {
 	roomsService := _roomsService.New(roomsData)
 	roomsHandlerAPI := _roomsHandler.New(roomsService)
 
-	// Middleware untuk menangani CORS
-	e.Use(middleware.CORS())
-
-	// Middleware untuk menghapus trailing slash
-	e.Pre(middleware.RemoveTrailingSlash())
 
 	//userHandler
 	e.POST("/users", userHandlerAPI.Register)

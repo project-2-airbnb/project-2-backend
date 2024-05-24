@@ -17,9 +17,10 @@ func main() {
 
 	e := echo.New()
 
-	routes.InitRouter(e, dbMysql)
+	
 	e.Pre(middleware.RemoveTrailingSlash())
 	e.Use(middleware.Logger())
 	e.Use(middleware.CORS()) 
+	routes.InitRouter(e, dbMysql)
 	e.Logger.Fatal(e.Start(":8080"))
 }

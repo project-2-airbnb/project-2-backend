@@ -105,37 +105,36 @@ func (rh *RoomHandler) Delete(c echo.Context) error {
 func (rh *RoomHandler) AllRoom(c echo.Context) error {
 	roomName := c.QueryParam("roomname")
 
-	// Panggil GetAllRooms dari service layer
-	rooms, err := rh.roomService.GetAllRooms(roomName)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, responses.JSONWebResponse("gagal mendapatkan semua room: "+err.Error(), nil))
+	var roomsList []rooms.Room
+	var err error
+
+	if roomName != "" {
+		roomsList, err = rh.roomService.GetAllRooms(roomName)
+	} else {
+		roomsList, err = rh.roomService.GetAllRooms("")
 	}
 
-	// Konversi []*rooms.Room ke []RoomResponse
-	var roomResponses []RoomResponse
-	for _, room := range rooms {
-		// Convert facilities to slice of facility names
-		var facilityNames []string
-		for _, facility := range room.Facilities {
-			facilityNames = append(facilityNames, facility.FacilityName)
-		}
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, responses.JSONWebResponse("Failed to get rooms: "+err.Error(), nil))
+	}
 
-		roomResponse := RoomResponse{
+	var response []RoomResponse
+	for _, room := range roomsList {
+		response = append(response, RoomResponse{
 			RoomPicture:     room.RoomPicture,
 			RoomName:        room.RoomName,
-			FullName:        room.FullName,
+			Description:     room.Description,
+			Location:        room.Location,
 			QuantityGuest:   room.QuantityGuest,
 			QuantityBedroom: room.QuantityBedroom,
 			QuantityBed:     room.QuantityBed,
 			Price:           room.Price,
 			Rating:          room.Rating,
-			Facilities:      facilityNames,
-		}
-		roomResponses = append(roomResponses, roomResponse)
+			Facilities:      room.FacilityNames,
+		})
 	}
 
-	// Kirim respons JSON yang berisi data ruangan
-	return c.JSON(http.StatusOK, responses.JSONWebResponse("berhasil mendapatkan semua room", roomResponses))
+	return c.JSON(http.StatusOK, responses.JSONWebResponse("berhasil mendapatkan data", response))
 }
 
 func (rh *RoomHandler) GetRoomByID(c echo.Context) error {
@@ -235,32 +234,4 @@ func (rh *RoomHandler) UpdateRoom(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, responses.JSONWebResponse("berhasil memperbarui room", nil))
 
-}
-
-func (rh *RoomHandler) GetRoomByUserID(c echo.Context) error {
-	// Extract user ID from authentication context
-	userID := middlewares.ExtractTokenUserId(c)
-	if userID == 0 {
-		return c.JSON(http.StatusUnauthorized, responses.JSONWebResponse("Unauthorized", nil))
-	}
-
-	// Call the service layer to get rooms by user ID
-	userRooms, err := rh.roomService.GetUserRooms(uint(userID))
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, responses.JSONWebResponse("Failed to get rooms by user ID: "+err.Error(), nil))
-	}
-
-	// Convert room data to RoomResponse
-	roomResponse := RoomResponse{
-		RoomPicture:     userRooms.RoomPicture,
-		RoomName:        userRooms.RoomName,
-		QuantityGuest:   userRooms.QuantityGuest,
-		QuantityBedroom: userRooms.QuantityBedroom,
-		QuantityBed:     userRooms.QuantityBed,
-		Price:           userRooms.Price,
-		Rating:          userRooms.Rating,
-		Facilities:      userRooms.FacilityNames,
-	}
-
-	return c.JSON(http.StatusOK, responses.JSONWebResponse("berhasil mendapatkan data", roomResponse))
 }

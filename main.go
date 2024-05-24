@@ -22,11 +22,7 @@ func main() {
 	e.Use(middleware.Logger())
 
 	// CORS configuration
-	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"*"}, // Ganti "*" dengan origin yang lebih spesifik jika perlu
-		AllowMethods: []string{echo.GET, echo.POST, echo.PUT, echo.DELETE},
-		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
-	}))
+	e.Use(middleware.CORS()) 
 
 	// Routes
 	routes.InitRouter(e, dbMysql)

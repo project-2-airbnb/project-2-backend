@@ -148,8 +148,6 @@ func (r *roomQuery) GetAllRooms() ([]rooms.Room, error) {
 			UserID:          room.UserID,
 			RoomPicture:     room.RoomPicture,
 			RoomName:        room.RoomName,
-			Description:     room.Description,
-			Location:        room.Location,
 			QuantityGuest:   room.QuantityGuest,
 			QuantityBedroom: room.QuantityBedroom,
 			QuantityBed:     room.QuantityBed,

@@ -3,7 +3,6 @@ package handler
 type RoomResponse struct {
 	RoomPicture     string   `json:"room_picture,omitempty" form:"room_picture"`
 	RoomName        string   `json:"room_name,omitempty" form:"room_name"`
-	FullName        string   `json:"full_name"`
 	Description     string   `json:"description,omitempty" form:"description"`
 	Location        string   `json:"location,omitempty" form:"location"`
 	QuantityGuest   int      `json:"quantity_guest,omitempty" form:"quantity_guest"`

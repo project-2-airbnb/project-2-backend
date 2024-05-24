@@ -30,15 +30,13 @@ func InitRouter(e *echo.Echo, db *gorm.DB) {
 	Review := _reviewData.New(db)
 	reviewService := _reviewService.New(Review)
 	reviewHandlerAPI := _reviewHandler.New(reviewService)
-	
-
 
 	//userHandler
 	e.POST("/users", userHandlerAPI.Register)
 	e.POST("/login", userHandlerAPI.Login)
-	e.PUT("/users/:id", userHandlerAPI.Update, middlewares.JWTMiddleware())
-	e.DELETE("/users/:id", userHandlerAPI.Delete, middlewares.JWTMiddleware())
-	e.GET("/users/:id", userHandlerAPI.GetProfile, middlewares.JWTMiddleware())
+	e.PUT("/users", userHandlerAPI.Update, middlewares.JWTMiddleware())
+	e.DELETE("/users", userHandlerAPI.Delete, middlewares.JWTMiddleware())
+	e.GET("/users", userHandlerAPI.GetProfile, middlewares.JWTMiddleware())
 
 	//roomHandler
 	e.POST("/rooms", roomsHandlerAPI.Create, middlewares.JWTMiddleware())

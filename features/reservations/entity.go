@@ -19,10 +19,16 @@ type Reservation struct {
 	DeletedAt       time.Time 
 }
 
+type ReservationHistory struct {
+    ReservationHistory []Reservation `json:"reservations_history"`
+}
+
 type ReservationModel interface {
 	AddReservation(reservation Reservation) error
+	GetReservationHistory(userID uint) ([]Reservation, error)
 }
 
 type ReservationService interface {
 	AddReservation(reservation Reservation) error
+	GetReservationsHistory(userID uint) ([]Reservation, error)
 }

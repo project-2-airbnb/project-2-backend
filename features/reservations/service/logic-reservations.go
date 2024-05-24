@@ -26,3 +26,11 @@ func (r *ReservationService) AddReservation(reservation reservations.Reservation
 	}
 	return nil
 }
+
+func (r *ReservationService) GetReservationsHistory(userID uint) ([]reservations.Reservation, error) {
+    bookings, err := r.reservationData.GetReservationHistory(userID)
+    if err != nil {
+        return nil, err
+    }
+    return bookings, nil
+}

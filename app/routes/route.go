@@ -58,5 +58,5 @@ func InitRouter(e *echo.Echo, db *gorm.DB) {
 	e.POST("reviews", reviewHandlerAPI.AddReview, middlewares.JWTMiddleware())
 
 	e.POST("reservations", reservationHandlerAPI.AddReservation, middlewares.JWTMiddleware())
-
+	e.GET("/reservations/history", reservationHandlerAPI.GetReservationHistory)
 }

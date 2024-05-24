@@ -41,3 +41,11 @@ func (m *model) AddReservation(reservation reservations.Reservation) error {
 
 	return tx.Commit().Error
 }
+
+func (m *model) GetReservationHistory(userID uint) ([]reservations.Reservation, error) {
+    var reservations []reservations.Reservation
+    if err := m.db.Where("user_id = ?", userID).Find(&reservations).Error; err != nil {
+        return nil, err
+    }
+    return reservations, nil
+}

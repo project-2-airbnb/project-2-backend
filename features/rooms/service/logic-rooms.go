@@ -22,14 +22,8 @@ func (r *RoomService) AddRoom(room rooms.Room) error {
 		return errors.New("[validation] roomname/location/description/roomprice/quantitybedroom/quantityguest tidak boleh kosong")
 	}
 
-	// Check if the user exists
-	_, err := r.roomData.SelectByUserID(room.UserID)
-	if err != nil {
-		return errors.New("UserID tidak valid atau telah dihapus")
-	}
-
 	// Create room
-	err = r.roomData.CreateRoom(room)
+	err := r.roomData.CreateRoom(room)
 	if err != nil {
 		return err
 	}

@@ -50,42 +50,64 @@ Untuk menjalankan aplikasi menggunakan Docker, Anda dapat menggunakan Dockerfile
 
 ## Struktur Direktori
 
-    app/: Berisi kode aplikasi utama, termasuk konfigurasi, basis data, migrasi, dan rute.
+- app/: Berisi kode aplikasi utama, termasuk konfigurasi, basis data, migrasi, dan rute.
 
-    features/: Berisi kode khusus fitur.
+- features/: Berisi kode khusus fitur.
 
-    utils/: Berisi fungsi utilitas.
+- utils/: Berisi fungsi utilitas.
 
-    .github/workflows/: Berisi file workflow GitHub Actions.
+- .github/workflows/: Berisi file workflow GitHub Actions.
 
-    documentation/: Berisi dokumentasi proyek.
+- documentation/: Berisi dokumentasi proyek.
 
-    .env.example: Contoh file variabel lingkungan.
+- .env.example: Contoh file variabel lingkungan.
 
-    Dockerfile: File konfigurasi Docker.
+- Dockerfile: File konfigurasi Docker.
 
-    main.go: Titik masuk aplikasi.
+- main.go: Titik masuk aplikasi.
 
 ## Endpoint API
 
-### Pengguna
+### Users
 
-    POST /register: Registrasi pengguna baru
+- POST /register: Registrasi pengguna baru
 
-    POST /login: Login pengguna
+- POST /login: Login pengguna
 
-    GET /users: Mendapatkan daftar pengguna
+- GET /users: Mendapatkan daftar pengguna
 
-    GET /users/:id: Mendapatkan detail pengguna
+- GET /users/:id: Mendapatkan detail pengguna
 
-    PUT /users/:id: Memperbarui detail pengguna
+- PUT /users/:id: Memperbarui detail pengguna
 
-    DELETE /users/:id: Menghapus pengguna
+- DELETE /users/:id: Menghapus pengguna
+
+### Rooms
+
+- POST /rooms: Menghosting rumah/kamar
+
+- DELETE /rooms/:id: Menghapus rumah hosting
+
+- GET /rooms: Mendapatkan list hosting rumah/kamar
+
+- GET /rooms/:id: Mendapatkan rumah/kamar berdasar id
+
+- PUT /rooms/:id: Mengupdate rumah/kamar hostingan
+
+### Reviews
+
+- POST /reviews: Membuat review
+
+### Reservations
+
+- POST /reservations: Membuat reservasi/booking
+
+- GET /reservations/history: Mendapatkan history reservasi/booking
 
 ## Kontribusi
 
-    Kontribusi sangat diterima! Silakan buka isu atau kirim pull request.
+- Kontribusi sangat diterima! Silakan buka isu atau kirim pull request.
 
 ## Lisensi
 
-    Proyek ini dilisensikan di bawah Lisensi MIT.
+- Proyek ini dilisensikan di bawah Lisensi MIT.

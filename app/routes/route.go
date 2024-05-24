@@ -46,7 +46,6 @@ func InitRouter(e *echo.Echo, db *gorm.DB) {
 	e.GET("/rooms", roomsHandlerAPI.AllRoom)
 	e.GET("/rooms/:id", roomsHandlerAPI.GetRoomByID, middlewares.JWTMiddleware())
 	e.PUT("/rooms/:id", roomsHandlerAPI.UpdateRoom, middlewares.JWTMiddleware())
-	e.GET("/rooms/users", roomsHandlerAPI.GetRoomByUserID, middlewares.JWTMiddleware())
 
 	e.POST("reviews", reviewHandlerAPI.AddReview, middlewares.JWTMiddleware())
 

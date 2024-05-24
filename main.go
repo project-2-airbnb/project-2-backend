@@ -17,10 +17,21 @@ func main() {
 
 	e := echo.New()
 
-	
+	// Middleware
 	e.Pre(middleware.RemoveTrailingSlash())
 	e.Use(middleware.Logger())
-	e.Use(middleware.CORS()) 
+
+	// CORS configuration
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"*"}, // Ganti "*" dengan origin yang lebih spesifik jika perlu
+		AllowMethods: []string{echo.GET, echo.POST, echo.PUT, echo.DELETE},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+	}))
+
+	// Routes
 	routes.InitRouter(e, dbMysql)
+
+	// Start server
 	e.Logger.Fatal(e.Start(":8080"))
 }
+

@@ -17,3 +17,5 @@ type Reservations struct {
 	Total           int       
 	PaymentMethod   string    
 }
+
+

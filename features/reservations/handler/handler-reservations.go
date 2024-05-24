@@ -51,3 +51,18 @@ func (rh *ReservationHandler) AddReservation(c echo.Context) error {
 
 	return c.JSON(http.StatusCreated, responses.JSONWebResponse("membuat reservasi berhasil", nil))
 }
+
+
+func (rh *ReservationHandler) GetReservationHistory(c echo.Context) error {
+    userID := middlewares.ExtractTokenUserId(c)
+    if userID == 0 {
+        return c.JSON(http.StatusUnauthorized, responses.JSONWebResponse("Unauthorized", nil))
+    }
+
+    reservation, err := rh.ReservationService.GetReservationsHistory(uint(userID))
+    if err != nil {
+        return c.JSON(http.StatusInternalServerError, responses.JSONWebResponse("gagal mendapatkan riwayat reservasi: "+err.Error(), nil))
+    }
+
+    return c.JSON(http.StatusOK, responses.JSONWebResponse("berhasil mendapatkan riwayat reservasi", reservation))
+}

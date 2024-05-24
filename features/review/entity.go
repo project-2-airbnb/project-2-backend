@@ -3,12 +3,20 @@ package review
 import "time"
 
 type Review struct {
-	ReviewID  string    `json:"review_id"`
-	UserID    string    `json:"user_id"`
-	RoomID    string    `json:"room_id"`
-	Rating    int       `json:"rating"`
-	Comment   string    `json:"comment"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	DeletedAt time.Time `json:"deleted_at"`
+	ReviewID  uint    	
+	UserID    uint    	
+	RoomID    uint    	
+	Rating    int       
+	Comment   string    
+	CreatedAt time.Time 
+	UpdatedAt time.Time 
+	DeletedAt time.Time 
+}
+
+type ReviewModel interface {
+	AddReview(review Review) error
+}
+
+type ReviewService interface {
+	AddReview(review Review) error
 }

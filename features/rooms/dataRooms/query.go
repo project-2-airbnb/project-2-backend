@@ -128,13 +128,13 @@ func (r *roomQuery) UpdateRoom(roomid uint, room rooms.Room) error {
 }
 
 // GetAllRooms implements rooms.DataRoominterface.
-func (r *roomQuery) GetAllRooms(userid uint) ([]rooms.Room, error) {
+func (r *roomQuery) GetAllRooms() ([]rooms.Room, error) {
 	var roomsList []rooms.Room
-	result := r.db.Model(&rooms.Room{}).
+	result := r.db.Model(&Rooms{}).
 		Select("rooms.*, COALESCE(AVG(reviews.rating), 0) AS rating").
 		Joins("LEFT JOIN reviews ON reviews.room_id = rooms.id").
+		Joins("LEFT JOIN users ON users.id = rooms.user_id").
 		Preload("Facilities").
-		Where("rooms.user_id != ?", userid).
 		Group("rooms.id").
 		Find(&roomsList)
 	if result.Error != nil {
@@ -145,43 +145,62 @@ func (r *roomQuery) GetAllRooms(userid uint) ([]rooms.Room, error) {
 
 // GetRoomByName implements rooms.DataRoominterface.
 func (r *roomQuery) GetRoomByName(roomName string) (*rooms.Room, error) {
-	var roomsGorm Rooms
-	if err := r.db.Where("room_name = ?", roomName).Find(&roomsGorm).Error; err != nil {
-		return nil, err
+	var roomGorm Rooms
+	tx := r.db.Preload("Facilities").Where("room_name = ?", roomName).First(&roomGorm)
+	if tx.Error != nil {
+		return nil, tx.Error
 	}
-	// mapping
-	var roomcore = rooms.Room{
-		RoomPicture:     roomsGorm.RoomPicture,
-		RoomName:        roomsGorm.RoomName,
-		QuantityGuest:   roomsGorm.QuantityGuest,
-		QuantityBedroom: roomsGorm.QuantityBedroom,
-		QuantityBed:     roomsGorm.QuantityBed,
-		Price:           roomsGorm.Price,
+
+	// Mapping data ke struktur Room
+	var roomCore rooms.Room
+	roomCore.RoomID = roomGorm.ID
+	roomCore.RoomPicture = roomGorm.RoomPicture
+	roomCore.RoomName = roomGorm.RoomName
+	roomCore.Description = roomGorm.Description
+	roomCore.Location = roomGorm.Location
+	roomCore.QuantityGuest = roomGorm.QuantityGuest
+	roomCore.QuantityBedroom = roomGorm.QuantityBedroom
+	roomCore.QuantityBed = roomGorm.QuantityBed
+	roomCore.Price = roomGorm.Price
+	roomCore.Facilities = make([]rooms.Facility, len(roomGorm.Facilities))
+	for i, facility := range roomGorm.Facilities {
+		roomCore.Facilities[i] = rooms.Facility{
+			FacilityID:   facility.ID,
+			FacilityName: facility.FacilityName,
+		}
 	}
-	return &roomcore, nil
+
+	return &roomCore, nil
 }
 
 // GetRoomByID implements rooms.DataRoominterface.
 func (r *roomQuery) GetRoomByID(roomID uint) (*rooms.Room, error) {
 	var roomGorm Rooms
-	tx := r.db.First(&roomGorm, roomID)
+	tx := r.db.Preload("Facilities").First(&roomGorm, roomID)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
 
-	// mapping
-	var roomcore = rooms.Room{
-		RoomPicture:     roomGorm.RoomPicture,
-		RoomName:        roomGorm.RoomName,
-		Description:     roomGorm.Description,
-		Location:        roomGorm.Location,
-		QuantityGuest:   roomGorm.QuantityGuest,
-		QuantityBedroom: roomGorm.QuantityBedroom,
-		QuantityBed:     roomGorm.QuantityBed,
-		Price:           roomGorm.Price,
+	// Mapping data dari roomGorm ke roomCore
+	var roomCore rooms.Room
+	roomCore.RoomID = roomGorm.ID
+	roomCore.RoomPicture = roomGorm.RoomPicture
+	roomCore.RoomName = roomGorm.RoomName
+	roomCore.Description = roomGorm.Description
+	roomCore.Location = roomGorm.Location
+	roomCore.QuantityGuest = roomGorm.QuantityGuest
+	roomCore.QuantityBedroom = roomGorm.QuantityBedroom
+	roomCore.QuantityBed = roomGorm.QuantityBed
+	roomCore.Price = roomGorm.Price
+	roomCore.Facilities = make([]rooms.Facility, len(roomGorm.Facilities))
+	for i, facility := range roomGorm.Facilities {
+		roomCore.Facilities[i] = rooms.Facility{
+			FacilityID:   facility.ID,
+			FacilityName: facility.FacilityName,
+		}
 	}
 
-	return &roomcore, nil
+	return &roomCore, nil
 }
 
 // SelectByUserID implements rooms.DataRoominterface.

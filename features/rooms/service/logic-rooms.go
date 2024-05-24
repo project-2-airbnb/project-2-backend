@@ -22,8 +22,14 @@ func (r *RoomService) AddRoom(room rooms.Room) error {
 		return errors.New("[validation] roomname/location/description/roomprice/quantitybedroom/quantityguest tidak boleh kosong")
 	}
 
+	// Check if the user exists
+	_, err := r.roomData.SelectByUserID(room.UserID)
+	if err != nil {
+		return errors.New("UserID tidak valid atau telah dihapus")
+	}
+
 	// Create room
-	err := r.roomData.CreateRoom(room)
+	err = r.roomData.CreateRoom(room)
 	if err != nil {
 		return err
 	}
@@ -71,7 +77,7 @@ func (r *RoomService) UpdateRoom(roomid uint, userid uint, room rooms.Room) erro
 }
 
 // GetAllRooms implements rooms.DataRoomService.
-func (r *RoomService) GetAllRooms(roomName string, userid uint) ([]*rooms.Room, error) {
+func (r *RoomService) GetAllRooms(roomName string) ([]*rooms.Room, error) {
 	if roomName != "" {
 		// Jika nama ruangan diberikan, lakukan pencarian berdasarkan nama ruangan
 		room, err := r.roomData.GetRoomByName(roomName)
@@ -82,7 +88,7 @@ func (r *RoomService) GetAllRooms(roomName string, userid uint) ([]*rooms.Room, 
 	}
 
 	// Jika tidak ada nama ruangan yang diberikan, kembalikan semua ruangan
-	allRooms, err := r.roomData.GetAllRooms(userid)
+	allRooms, err := r.roomData.GetAllRooms()
 	if err != nil {
 		return nil, err
 	}
@@ -102,4 +108,12 @@ func (r *RoomService) GetRoomByID(roomID uint) (*rooms.Room, error) {
 		return nil, errors.New("id not valid")
 	}
 	return r.roomData.GetRoomByID(roomID)
+}
+
+func (r *RoomService) GetUserRooms(userID uint) (*rooms.Room, error) {
+	rooms, err := r.roomData.SelectByUserID(userID)
+	if err != nil {
+		return nil, err
+	}
+	return rooms, nil
 }
